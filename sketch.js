@@ -82,7 +82,7 @@ function saveParameter(){
     'maxX' : tMaxX,
     'maxY' : tMaxY
   }
-  downloadToFile(JSON.stringify(data), 'parameter.txt', 'text/plain');
+  downloadToFile(JSON.stringify(data), 'parameter.json', 'text/plain');
 }
 
 
