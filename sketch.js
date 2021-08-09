@@ -10,7 +10,7 @@ let infoLocation;
 let doPointZoom = false, isZoomOut = false;
 let inputMaxX, inputMinX, inputMaxY, inputMinY, inputMaxIter, pointZoomAmt = 0.01;
 let currentPos = {'minX' : tMinX, 'minY' : tMinY, 'maxX' : tMaxX, 'maxY' : tMaxY};
-
+let r, g=256, b=256;
 function setup() {
   createCanvas(448, 256);
   pixelDensity(1);
@@ -24,9 +24,14 @@ function setup() {
   inputMaxY = document.getElementById('maxY');
   inputMinX = document.getElementById('minX');
   inputMinY = document.getElementById('minY');
+  config = document.getElementById('config');
   inputMaxIter = document.getElementById('maxIter');
+  document.getElementById('red').addEventListener('change', (ev) => r = ev.target.value);
+  document.getElementById('green');
+  blue = document.getElementById('blue');
   pointZoomRange = document.getElementById('pointZoomAmt');
-
+  error = document.getElementById('error');
+  
   inputMaxIter.value = maxIter;
   updateInfo();
   document.getElementById('upload').addEventListener('change', handleFileSelect, false);
@@ -82,6 +87,8 @@ function saveConfig(){
   downloadToFile(JSON.stringify(data), 'config.txt', 'text/plain');
 }
 
+
+
 function handleFileSelect(evt) {
   var files = evt.target.files;
   f = files[0];
@@ -96,7 +103,6 @@ function handleFileSelect(evt) {
 
 
 function loadData(data){
-  error = document.getElementById('error');
   try{
     data = JSON.parse(data);
     tMinY = data.minY;
@@ -110,6 +116,7 @@ function loadData(data){
   }
 }
 
+
 function resetLocation(){
   tMinX = -2.5;
   tMaxX = 1;
@@ -122,11 +129,24 @@ function setMaxIter(e){
   maxIter = e.target.value;
 }
 
+function demo(n){
+  if (n == 1){
+    loadData('{"minX":"-0.9382322492310408","minY":"-0.10144867274785412","maxX":"-0.9382285561774096","maxY":"-0.1014456926055355"}');
+  }else if (n == 2){
+    loadData('{"minX":"-0.8870122244103785","minY":"-0.07795486870677842","maxX":"-0.8824093762479188","maxY":"-0.07582173384850426"}');
+  }
+}
+
 function setLocation(){
-  tMinX = inputMinX.value;
-  tMaxX = inputMaxX.value;
-  tMinY = inputMinY.value;
-  tMaxY = inputMaxY.value;
+  if (config.value == ""){
+    tMinX = inputMinX.value;
+    tMaxX = inputMaxX.value;
+    tMinY = inputMinY.value;
+    tMaxY = inputMaxY.value;
+    error.style.display = 'none';
+  } else {
+    loadData(config.value);
+  }
 }
 
 function updateInfo(){
@@ -315,9 +335,9 @@ function generatePixels(width, height, pixels){
         pixels[pix + 2] = iteration;
         pixels[pix + 3] = 255;
       } else {
-        pixels[pix + 0] = 0;
-        pixels[pix + 1] = 255;
-        pixels[pix + 2] = 255;
+        pixels[pix + 0] = r;
+        pixels[pix + 1] = g;
+        pixels[pix + 2] = b;
         pixels[pix + 3] = 255;
       }
     }

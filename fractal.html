@@ -37,14 +37,33 @@
           <td>MinY</td>
           <td><input id='minY'  type=text></td>
         </tr>
-      
-        <tr>
-          <td><input type='button' value='Go to position' onclick="setLocation()"></td>
-          <td><input type='button' value='Reset' onclick="resetLocation()"></td>
-        </tr>
         <tr>
           <td>Iteration</td>
           <td><input id='maxIter' type=text></td>
+        </tr>
+        <tr>
+          <td>JSON Config</td>
+          <td><input id='config'  type=text></td>
+        </tr>
+        <tr>
+          <td><input type='button' value='Go to position' onclick="setLocation()"></td>
+          <td><input type='button' value='  Reset ' onclick="resetLocation()"></td>
+        </tr>
+        <tr>
+          <td><input type='button' value='     Demo 1     ' onclick="demo(1)"></td>
+          <td><input type='button' value='Demo 2' onclick="demo(2)"></td>
+        </tr>
+        <tr>
+          <td>Red</td>
+          <td><input type='range' min='0' max='256' value='0' id='red'></td>
+        </tr>
+        <tr>
+          <td>Green</td>
+          <td><input type='range' min='0' max='256' value='256' id='green'></td>
+        </tr>
+        <tr>
+          <td>Blue</td>
+          <td><input type='range' min='0' max='256' value='256' id='blue'></td>
         </tr>
         <tr>
           <td>Point Zoom amt</td>
@@ -56,7 +75,7 @@
           <td><input id='upload' type='file' accept="text" name="files[]"></td>
         </tr>
         <tr>
-          <td><div id='error' style="color: red; display: none;">Invalid file!</div></td> 
+          <td colspan="2"><div id='error' style="color: red; display: none;">Invalid file or json given!</div></td> 
         </tr>
         <tr>
           <td>Save parameter</td>
