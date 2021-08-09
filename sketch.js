@@ -10,7 +10,7 @@ let infoLocation;
 let doPointZoom = false, isZoomOut = false;
 let inputMaxX, inputMinX, inputMaxY, inputMinY, inputMaxIter, pointZoomAmt = 0.01;
 let currentPos = {'minX' : tMinX, 'minY' : tMinY, 'maxX' : tMaxX, 'maxY' : tMaxY};
-let r, g=256, b=256;
+
 function setup() {
   createCanvas(448, 256);
   pixelDensity(1);
@@ -24,11 +24,9 @@ function setup() {
   inputMaxY = document.getElementById('maxY');
   inputMinX = document.getElementById('minX');
   inputMinY = document.getElementById('minY');
-  config = document.getElementById('config');
+  parameter = document.getElementById('parameter');
   inputMaxIter = document.getElementById('maxIter');
-  document.getElementById('red').addEventListener('change', (ev) => r = ev.target.value);
-  document.getElementById('green');
-  blue = document.getElementById('blue');
+  
   pointZoomRange = document.getElementById('pointZoomAmt');
   error = document.getElementById('error');
   
@@ -77,14 +75,14 @@ const downloadToFile = (content, filename, contentType) => {
 	URL.revokeObjectURL(a.href);
 };
 
-function saveConfig(){
+function saveParameter(){
   const data = {
     'minX' : tMinX,
     'minY' : tMinY,
     'maxX' : tMaxX,
     'maxY' : tMaxY
   }
-  downloadToFile(JSON.stringify(data), 'config.txt', 'text/plain');
+  downloadToFile(JSON.stringify(data), 'parameter.txt', 'text/plain');
 }
 
 
@@ -138,14 +136,14 @@ function demo(n){
 }
 
 function setLocation(){
-  if (config.value == ""){
+  if (parameter.value == ""){
     tMinX = inputMinX.value;
     tMaxX = inputMaxX.value;
     tMinY = inputMinY.value;
     tMaxY = inputMaxY.value;
     error.style.display = 'none';
   } else {
-    loadData(config.value);
+    loadData(parameter.value);
   }
 }
 
@@ -335,9 +333,9 @@ function generatePixels(width, height, pixels){
         pixels[pix + 2] = iteration;
         pixels[pix + 3] = 255;
       } else {
-        pixels[pix + 0] = r;
-        pixels[pix + 1] = g;
-        pixels[pix + 2] = b;
+        pixels[pix + 0] = 0;
+        pixels[pix + 1] = 255;
+        pixels[pix + 2] = 255;
         pixels[pix + 3] = 255;
       }
     }
