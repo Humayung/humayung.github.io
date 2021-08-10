@@ -29,6 +29,9 @@ function setup() {
   
   pointZoomRange = document.getElementById('pointZoomAmt');
   error = document.getElementById('error');
+  generating = document.getElementById('generating');
+  resolutionOption = document.getElementById('res');
+  resolution = document.getElementById('resolution');
   
   inputMaxIter.value = maxIter;
   updateInfo();
@@ -52,6 +55,38 @@ function draw() {
     }
   }
   animate();
+}
+
+function toggleSave(){
+  resolutionOption.style.display = 'block';
+}
+
+function saveToImage(){
+  // generatePixels();
+  generating.style.display = "block";
+  setTimeout(startSaving, 1000);
+}
+
+function startSaving(){
+  let multiplier = resolution.selectedIndex + 1;
+  var c = document.getElementById("myCanvas");
+  var ctx = c.getContext("2d");
+  var imgWidth = width * multiplier * 10;
+  var imgHeigth = height * multiplier * 10
+  c.width = imgWidth;
+  c.height = imgHeigth;
+  var imgData = ctx.createImageData(c.width, c.height);
+  generatePixels(c.width, c.height, imgData.data);
+  ctx.putImageData(imgData, 10, 10);
+  
+  var dataURL = c.toDataURL("image/png");
+  var newTab = window.open('about:blank','image from canvas');
+  
+  
+  newTab.document.write("<img src='" + dataURL + "' alt='from canvas'/>");
+  generating.style.display = 'none';
+  resolutionOption.style.display = 'none';
+
 }
 
 function isValidCoord(){
@@ -305,7 +340,7 @@ async function mandelBrot() {
 
 }
 
-function generatePixels(width, height, pixels){
+function generatePixels(width, height, outPixels){
   let x0, y0, x, y, iteration, progress = 0, maxProgress = width * height;
   for (let px = 0; px < width; px++) {
     for (let py = 0; py < height; py++) {
@@ -328,15 +363,15 @@ function generatePixels(width, height, pixels){
      
       pix = (px + py * width) * 4;
       if (iteration < maxIter) {
-        pixels[pix + 0] = 0;
-        pixels[pix + 1] = iteration;
-        pixels[pix + 2] = iteration;
-        pixels[pix + 3] = 255;
+        outPixels[pix + 0] = 0;
+        outPixels[pix + 1] = iteration;
+        outPixels[pix + 2] = iteration;
+        outPixels[pix + 3] = 255;
       } else {
-        pixels[pix + 0] = 0;
-        pixels[pix + 1] = 255;
-        pixels[pix + 2] = 255;
-        pixels[pix + 3] = 255;
+        outPixels[pix + 0] = 0;
+        outPixels[pix + 1] = 255;
+        outPixels[pix + 2] = 255;
+        outPixels[pix + 3] = 255;
       }
     }
    progress += height;

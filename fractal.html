@@ -4,10 +4,8 @@
     <script src='https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.3.1/p5.min.js'></script>
     <script src="./sketch.js"></script>
   </head>
-  <body style='margin: auto;
-    width: 50%;
-    border: 3px solid black;
-    padding: 10px;'>
+  <body>
+    <canvas id="myCanvas" style="display: none;"></canvas>
     <main>
     </main>
     <header>
@@ -66,8 +64,27 @@
           <td colspan="2"><div id='error' style="color: red; display: none;">Invalid file or json given!</div></td> 
         </tr>
         <tr>
-          <td>Save parameter</td>
           <td><button id="btnSave" onclick="saveParameter()">Save Parameter</button></td>
+          <td><button id="btnToggleSave" onclick="toggleSave()">Save To Image </button></td>
+        </tr>
+        <tr>
+          <td colspan="2">
+            <div id="res" style="display: none;">
+              Resolution
+              <select name="resolution" id="resolution">
+                <option value="1">10x</option>
+                <option value="2">20x</option>
+                <option value="3">30x</option>
+                <option value="4">40x</option>
+              </select>
+              <button id="btnSaveToImage" onclick="saveToImage()">Confirm</button>
+              <div id='generating' style="color: green; display: none;">Generating HD Image..</div>
+            </div>
+          </td> 
+        </tr>
+        <tr>
+          <td></td>
+          
         </tr>
         
       </table>

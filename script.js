@@ -125,7 +125,7 @@ const draw = () => {
   for (var i = 0; i < colorsCount; i++){
     gradient.addColorStop(i / colorsCount, currentColors[i]);
   }
-  var text = "ostrich scan expose grab damp diet angle circle collect visit wheat brief ";
+  var text = "ostrich scan expose grab damp diet angle circle collect visit wheat brief";
   ctx.lineWidth = (c.width + c.height) * 0.002;
   var fontSize = ((c.width + c.height) * 5) / text.length;
   ctx.font = `${fontSize}px Verdana`;
