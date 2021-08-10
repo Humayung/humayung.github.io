@@ -99,7 +99,7 @@ var ctx = c.getContext("2d");
 var angle = 0;
 
 const r = () =>{
-  return Math.random() * 256;
+  return Math.random() * 200 + 56;
 }
 
 
@@ -109,17 +109,9 @@ interpolateColors();
 // console.log(currentColors);
 ////////////////////SETUP
 
-
-
-
-
-
 const draw = () => {
   clear(); 
-  angle += 0.05;
-  if( angle > Math.PI * 2){
-    angle = 0;
-  }
+  angle = noise.simplex2(angle * 0.005, time * 0.005) * Math.PI * 2;
   ctx.canvas.width  = window.innerWidth;
   ctx.canvas.height = window.innerHeight - 20;
   // Create gradient
@@ -133,11 +125,10 @@ const draw = () => {
   for (var i = 0; i < colorsCount; i++){
     gradient.addColorStop(i / colorsCount, currentColors[i]);
   }
-  
-    var text = "ostrich scan expose grab damp diet angle circle collect visit wheat brief ";
-    ctx.lineWidth = (c.width + c.height) * 0.002;
-    var fontSize = ((c.width + c.height) * 5) / text.length;
-    ctx.font = `${fontSize}px Verdana`;
+  var text = "ostrich scan expose grab damp diet angle circle collect visit wheat brief ";
+  ctx.lineWidth = (c.width + c.height) * 0.002;
+  var fontSize = ((c.width + c.height) * 5) / text.length;
+  ctx.font = `${fontSize}px Verdana`;
   
   // Fill with gradient
   ctx.fillStyle = gradient;
@@ -158,8 +149,8 @@ const draw = () => {
     var y = fontSize * (i + 1) + marginTop ;
 
     // Noise
-    var sy = noise.simplex3(y, time * 0.05, x * y) * shakeAmt;
-    var sx = noise.simplex3(x, time * 0.05, y) * shakeAmt;
+    var sy = noise.simplex3(y, time * 0.08, x * y) * shakeAmt;
+    var sx = noise.simplex3(x, time * 0.08, y) * shakeAmt;
     var sa = noise.simplex2(y, time * rotAmt);
     var saa = noise.simplex2(time * 0.05, y) * rotPosAmt;
 

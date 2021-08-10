@@ -61,7 +61,6 @@ function isValidCoord(){
 function setPointZoomAmt(){
   
   pointZoomAmt = map(pointZoomRange.value, 0, 100, 0.001, 0.05);
-  print(pointZoomAmt);
 }
 
 
@@ -90,7 +89,7 @@ function saveParameter(){
 function handleFileSelect(evt) {
   var files = evt.target.files;
   f = files[0];
-  var reader = new FileReader();
+  var reader = new FileReader();  
   reader.onload = (function(theFile) {
       return function(e) {
         loadData(e.target.result);
@@ -108,10 +107,12 @@ function loadData(data){
     tMinX = data.minX;
     tMaxX = data.maxX;
     updateInfo();
+    updateCurrentpos();
     error.style.display = 'none';
   }catch(e){
     error.style.display = 'block';
   }
+  
 }
 
 
@@ -210,7 +211,7 @@ function mouseReleased() {
 }
 
 function updateCurrentpos(){
-  currentPos = {'minX' : tMinX, 'minY' : tMinY, 'maxX' : tMaxX, 'maxY' : tMaxY};
+  currentPos = {'minX' : parseFloat(tMinX), 'minY' : parseFloat(tMinY), 'maxX' : parseFloat(tMaxX), 'maxY' : parseFloat(tMaxY)};
 }
 
 function rectZoom(){
@@ -247,7 +248,6 @@ function drag(){
 
   tMinY = currentPos.minY + scaledDy;
   tMaxY = currentPos.maxY + scaledDy;
-  console.log(`${mouseX} ${mouseY} ${width} ${height}`);
   updateInfo();
   // print(`ScaledDx ${scaledDx} ScaledDx ${scaledDy}`);
 }
