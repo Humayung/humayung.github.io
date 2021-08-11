@@ -11,6 +11,9 @@ let doPointZoom = false, isZoomOut = false;
 let inputMaxX, inputMinX, inputMaxY, inputMinY, inputMaxIter, pointZoomAmt = 0.01;
 let currentPos = {'minX' : tMinX, 'minY' : tMinY, 'maxX' : tMaxX, 'maxY' : tMaxY};
 let modifiedFormula = true;
+let modifier = 3;
+let tModifier = 3;
+let drawing = true;
 
 function setup() {
   createCanvas(448, 256);
@@ -45,10 +48,13 @@ function setup() {
 
 function toggleFormula(){
   modifiedFormula = !modifiedFormula;
+  tModifier = 2 + modifiedFormula;
 }
 
 function draw() {
-  mandelBrot();
+  if (drawing){
+    mandelBrot();
+  }
   if (isValidCoord()){
     if(doPointZoom){
       pointZoom();
@@ -324,11 +330,11 @@ function keyReleased(){
 
 function animate(){
   amt = 0.3;
-  let gap = 0.01 * (currentPos.minX - minX);
   minX = lerp(minX, tMinX, amt);
   minY = lerp(minY, tMinY, amt);
   maxX = lerp(maxX, tMaxX, amt);
   maxY = lerp(maxY, tMaxY, amt);
+  modifier = lerp(modifier, tModifier, amt);
 }
 
 function selectRect() {
@@ -339,7 +345,7 @@ function selectRect() {
 }
 
 let timeMean = [];
-async function mandelBrot() {
+function mandelBrot() {
   loadPixels();
   generatePixels(width, height, pixels);
   updatePixels();
@@ -347,7 +353,7 @@ async function mandelBrot() {
 }
 
 function generatePixels(width, height, outPixels){
-  let x0, y0, x, y, iteration, progress = 0, maxProgress = width * height;
+  let x0, y0, x, y, iteration;
   for (let px = 0; px < width; px++) {
     for (let py = 0; py < height; py++) {
       x0 = map(px, 0, width, minX, maxX);
@@ -359,29 +365,16 @@ function generatePixels(width, height, outPixels){
 
       while (x < 2 && iteration--) {
         xTemp = x*x - y*y + x0;
-        y = (2 + modifiedFormula)*x*y + y0;
+        y = modifier*x*y + y0;
         x = xTemp;
       }
-
       iteration = maxIter - iteration;
-     
       pix = (px + py * width) * 4;
-      if (iteration < maxIter) {
-        outPixels[pix + 0] = 0;
-        outPixels[pix + 1] = iteration;
-        outPixels[pix + 2] = iteration;
-        outPixels[pix + 3] = 255;
-      } else {
-        outPixels[pix + 0] = 0;
-        outPixels[pix + 1] = 255;
-        outPixels[pix + 2] = 255;
-        outPixels[pix + 3] = 255;
-      }
+      outPixels[pix + 0] = 0;
+      outPixels[pix + 1] = iteration;
+      outPixels[pix + 2] = iteration;
+      outPixels[pix + 3] = 255;
     }
-   progress += height;
-    // if(progress % (height * 50) == 0 || progress == maxProgress){
-    //   console.log(progress/maxProgress)
-    // }
   }
   
 }
