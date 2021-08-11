@@ -10,6 +10,7 @@ let infoLocation;
 let doPointZoom = false, isZoomOut = false;
 let inputMaxX, inputMinX, inputMaxY, inputMinY, inputMaxIter, pointZoomAmt = 0.01;
 let currentPos = {'minX' : tMinX, 'minY' : tMinY, 'maxX' : tMaxX, 'maxY' : tMaxY};
+let modifiedFormula = true;
 
 function setup() {
   createCanvas(448, 256);
@@ -33,12 +34,17 @@ function setup() {
   resolutionOption = document.getElementById('res');
   resolution = document.getElementById('resolution');
   
+  document.getElementById('toggleFormula').addEventListener('change', toggleFormula, false);
   inputMaxIter.value = maxIter;
   updateInfo();
   document.getElementById('upload').addEventListener('change', handleFileSelect, false);
   inputMaxIter.addEventListener('input', setMaxIter);
   inputMaxIter.addEventListener('propertychange', setMaxIter);
   pointZoomRange.addEventListener('change', setPointZoomAmt);
+}
+
+function toggleFormula(){
+  modifiedFormula = !modifiedFormula;
 }
 
 function draw() {
@@ -352,10 +358,8 @@ function generatePixels(width, height, outPixels){
       let xTemp;
 
       while (x < 2 && iteration--) {
-        //xTemp = x*x*x - 3 * x*y*y + x0;
         xTemp = x*x - y*y + x0;
-        y = 3*x*y + y0;
-        //y = 3 * x*x*y - y*y*y + y0;
+        y = (2 + modifiedFormula)*x*y + y0;
         x = xTemp;
       }
 
