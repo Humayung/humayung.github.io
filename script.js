@@ -93,8 +93,8 @@ const line = (x1, y1, x2, y2) =>{
 noise.seed(Math.random());
 var time = 0;
 var c = document.getElementById("myCanvas");
-c.addEventListener('click', function() { window.open("fractal.html","_self")}, false);
 var ctx = c.getContext("2d");
+c.addEventListener('click', function() { window.open("fractal.html","_self")}, false);
 
 var angle = 0;
 

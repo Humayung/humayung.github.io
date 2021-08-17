@@ -344,8 +344,7 @@ function selectRect() {
   
 }
 
-let timeMean = [];
-function mandelBrot() {
+let timeMean = [];function mandelBrot() {
   loadPixels();
   generatePixels(width, height, pixels);
   updatePixels();
@@ -377,4 +376,5 @@ function generatePixels(width, height, outPixels){
     }
   }
   
+  console.log('s');
 }
