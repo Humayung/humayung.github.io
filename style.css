@@ -1,0 +1,69 @@
+body {
+	font-family: sans-serif;
+	background-color: #555;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	text-align: center;
+	min-height: 100vh;
+}
+
+#colorDegree {
+	margin: 5px;
+	color: #ccc;
+}
+
+#ditherOutput {
+	display: none;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+
+#ditherSettings {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+}
+
+
+#drop-area {
+	border: 2px dashed #ccc;
+	border-radius: 20px;
+	min-width: 480px;
+	max-width: 100vw;
+	padding: 20px;
+}
+#drop-area.highlight {
+	border-color: purple;
+}
+
+#output {
+	margin-top: 20px;
+	width: 100%;
+}
+p {
+	margin-top: 0;
+	color: #ccc;
+	font-size: xx-large;
+}
+.my-form {
+	margin-bottom: 10px;
+}
+.button {
+	display: inline-block;
+	padding: 10px;
+	background: #ccc;
+	cursor: pointer;
+	border-radius: 5px;
+	border: 1px solid #ccc;
+	margin: 5px;
+}
+.button:hover {
+	background: #ddd;
+}
+#fileElem {
+	display: none;
+}

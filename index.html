@@ -1,10 +1,30 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<script type="text/javascript" src="script.js"></script>
+		<script type="text/javascript" src="p5.min.js"></script>
 
-<body>
-
-<script src="perlin.js"></script>
-<canvas id="myCanvas" width="500" height="500"></canvas><script src="script.js"></script>
-
-</body>
+		<link rel="stylesheet" href="style.css" />
+		<title>Document</title>
+	</head>
+	<body>
+		<p>Image Dithering dengan metode Floyd-steinberg</p>
+		<div id="drop-area">
+			<input type="file" id="fileElem" multiple accept="image/*" onchange="handleFiles(this.files)" />
+			<label class="button" for="fileElem" id="selectImage">Select Image</label>
+			<div id="ditherOutput">
+				<div id="ditherSettings">
+					<div id="colorDegree">
+						<div>Derajat Warna</div>
+						<input type="number" value="1" onchange="setColorDegree(event)" pattern="[0-9]" />
+					</div>
+				</div>
+				<img src="" id="output" />
+				<label class="button" onclick="prepareDither()">Dither Image</label>
+			</div>
+		</div>
+	</body>
 </html>

@@ -1,177 +1,179 @@
-var colorsCount = 20;
-var colors = [];
-var oldColors = [];
-var currentColors = [];
-var colorPos = 0;
+// ************************ Drag and drop ***************** //
+let dropArea;
+window.onload = function () {
+	// ************************ Drag and drop ***************** //
+	let dropArea = document.getElementById("drop-area")
 
-const rgb = (str) =>{
-  var s = str.substring(4, str.length - 1)
-            .replaceAll(' ', '')
-            .split(','); 
-  return {
-    'r' : s[0],
-    'g' : s[1],
-    'b' : s[2]
-  }
+		// Prevent default drag behaviors
+		;['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+			dropArea.addEventListener(eventName, preventDefaults, false)
+			document.body.addEventListener(eventName, preventDefaults, false)
+		})
+
+		// Highlight drop area when item is dragged over it
+		;['dragenter', 'dragover'].forEach(eventName => {
+			dropArea.addEventListener(eventName, highlight, false)
+		})
+
+		;['dragleave', 'drop'].forEach(eventName => {
+			dropArea.addEventListener(eventName, unhighlight, false)
+		})
+
+	// Handle dropped files
+	dropArea.addEventListener('drop', handleDrop, false)
+
+	function preventDefaults(e) {
+		e.preventDefault()
+		e.stopPropagation()
+	}
+
+	function highlight(e) {
+		dropArea.classList.add('highlight')
+	}
+
+	function unhighlight(e) {
+		dropArea.classList.remove('active')
+	}
+
+};
+
+function handleDrop(e) {
+	var dt = e.dataTransfer;
+	var files = dt.files;
+	processImage(files[0]);
 }
 
-const toString = (rgb) =>{
-  return `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+function handleFiles(files) {
+	processImage(files[0]);
 }
 
-const lerp = (from, to, amt) => {
-  return parseFloat((to - from) * amt) + parseFloat(from);
+let loadedImage;
+let colorDegree = 1;
+let bw = false;
+function processImage(file) {
+	console.log(file)
+	if (file.type.includes("image")) {
+		const image = URL.createObjectURL(file);
+		const output = document.getElementById('output')
+		output.src = image
+		loadedImage = file
+		const selectImage = document.getElementById('selectImage')
+		const ditherImage = document.getElementById('ditherOutput')
+		selectImage.style.display = 'none'
+		ditherImage.style.display = 'flex'
+		return
+	}
+	console.log('Not an image!')
 }
 
-const lerpColor = (from, to, amt) =>{
-  var newR = lerp(from.r, to.r, amt);
-  var newG = lerp(from.g, to.g, amt);
-  var newB = lerp(from.b, to.b, amt);
+function prepareDither() {
+	const output = document.getElementById('output')
+	const canvas = document.createElement("canvas");
+	const ctx = canvas.getContext("2d");
+	var img = new Image;
+	img.onload = function () {
+		canvas.width = img.width
+		canvas.height = img.height
+		ctx.drawImage(img, 0, 0);
+		const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+		console.log(imageData)
+		makeDithered(imageData, colorDegree)
+		ctx.putImageData(imageData, 0, 0)
+		const out = canvas.toDataURL("image/jpeg");
+		output.src = out
 
-  return {
-    'r' : newR,
-    'g' : newG,
-    'b' : newB
-  };
+	}
+	img.src = URL.createObjectURL(loadedImage);
+
 }
 
-function getLines(ctx, text, maxWidth) {
-  var words = text.split(' ');
-  var lines = [];
-  var currentLine = words[0];
-
-  for (var i = 1; i < words.length; i++) {
-      var word = words[i];
-      var width = ctx.measureText(currentLine + " " + word).width;
-      if (width < maxWidth) {
-          currentLine += " " + word;
-      } else {
-          lines.push(currentLine);
-          currentLine = word;
-      }
-  }
-  lines.push(currentLine);
-  return lines;
+function setColorDegree(event) {
+	colorDegree = event.target.value
 }
 
-function nextColors(){
-  oldColors = colors;
-  colors = [];
-  for (var i = 0; i < colorsCount; i++){
-    colors.push(`rgb(${r()}, ${r()}, ${r()})`);
-  }
-}
-const clear = () => {
-  ctx.clearRect(0, 0, c.width, c.height);
+function toggleBw(obj) {
+
 }
 
-
-const interpolateColors = () =>{
-  if (colorPos > 1){
-    colorPos = 0;
-    nextColors();
-  }
-
-  // currentColors = colors;
-  currentColors = [];
-  for (var i = 0; i < colors.length; i++){
-      var color = toString(lerpColor(rgb(oldColors[i]), rgb(colors[i]), colorPos));
-      currentColors.push(color);
-  }
-  colorPos += 0.07;
+function imageIndex(img, x, y) {
+	return 4 * (x + y * img.width);
 }
 
-const line = (x1, y1, x2, y2) =>{
-  ctx.beginPath();
-  ctx.moveTo(x1, y1);
-  ctx.lineTo(x2, y2);
-  ctx.stroke();
+function getColorAtindex(img, x, y) {
+	let idx = imageIndex(img, x, y);
+	let pix = img.data;
+	let red = pix[idx];
+	let green = pix[idx + 1];
+	let blue = pix[idx + 2];
+	let alpha = pix[idx + 3];
+	return [red, green, blue, alpha];
 }
 
+function setColorAtIndex(img, x, y, clr) {
+	let idx = imageIndex(img, x, y);
+	let pix = img.data;
+	pix[idx] = clr[0];
+	pix[idx + 1] = clr[1];
+	pix[idx + 2] = clr[2];
 
-/////////////////////SETUP
-noise.seed(Math.random());
-var time = 0;
-var c = document.getElementById("myCanvas");
-var ctx = c.getContext("2d");
-c.addEventListener('click', function() { window.open("fractal.html","_self")}, false);
-
-var angle = 0;
-
-const r = () =>{
-  return Math.random() * 200 + 56;
 }
 
+// Finds the closest step for a given value
+// The step 0 is always included, so the number of steps
+// is actually steps + 1
+function closestStep(max, steps, value) {
+	const closest = Math.round((steps * value) / 255) * Math.floor(255 / steps);
 
-nextColors();
-oldColors = colors;
-interpolateColors();
-// console.log(currentColors);
-////////////////////SETUP
-
-const draw = () => {
-  clear(); 
-  angle = noise.simplex2(angle * 0.005, time * 0.005) * Math.PI * 2;
-  ctx.canvas.width  = window.innerWidth;
-  ctx.canvas.height = window.innerHeight - 20;
-  // Create gradient
-  var x1 = c.width * Math.cos(angle);  // angle in radians
-  var y1 = c.width * Math.sin(angle); 
-  var x2 = c.width * Math.cos(angle);  // angle in radians
-  var y2 = c.width * Math.sin(angle);  // angle in radians
-  var gradient = ctx.createLinearGradient(-x1, -y1, x2, y2);
-
-  
-  for (var i = 0; i < colorsCount; i++){
-    gradient.addColorStop(i / colorsCount, currentColors[i]);
-  }
-  var text = "ostrich scan expose grab damp diet angle circle collect visit wheat brief";
-  ctx.lineWidth = (c.width + c.height) * 0.002;
-  var fontSize = ((c.width + c.height) * 5) / text.length;
-  ctx.font = `${fontSize}px Verdana`;
-  
-  // Fill with gradient
-  ctx.fillStyle = gradient;
-  ctx.strokeStyle = gradient;
-
-
-  var lines = getLines(ctx, text, c.width);
-  var marginTop = (c.height - lines.length * fontSize) / 2;
-  
-  time += 0.05;
-  var shakeAmt = 50;
-  var rotAmt = 0.1;
-  var rotPosAmt = c.width * 0.5;  
-
-  
-  for(var i = 0; i < lines.length; i++){
-    var x = 0;
-    var y = fontSize * (i + 1) + marginTop ;
-
-    // Noise
-    var sy = noise.simplex3(y, time * 0.08, x * y) * shakeAmt;
-    var sx = noise.simplex3(x, time * 0.08, y) * shakeAmt;
-    var sa = noise.simplex2(y, time * rotAmt);
-    var saa = noise.simplex2(time * 0.05, y) * rotPosAmt;
-
-    // Text
-    ctx.save();
-    ctx.textAlign = "center";
-    ctx.translate(x + sy + c.width/2 + saa, y + sx);
-    ctx.rotate(sa * 0.1);
-    ctx.fillText(lines[i], -saa, 0);
-    ctx.restore();
-
-    // Rect
-    ctx.beginPath();
-    // ctx.rect(0, 0, c.width, c.height);
-    ctx.stroke();
-  }
-  interpolateColors();
+	return closest
 }
 
+function makeDithered(img, steps) {
+	let maxProgress = img.width * img.height
+	let progress = 0
+	for (let y = 0; y < img.height; y++) {
+		for (let x = 0; x < img.width; x++) {
+			let clr = getColorAtindex(img, x, y);
+			let oldR = clr[0];
+			let oldG = clr[1];
+			let oldB = clr[2];
+			let newR = closestStep(255, steps, oldR);
+			let newG = closestStep(255, steps, oldG);
+			let newB = closestStep(255, steps, oldB);
+
+			let newClr = [newR, newG, newB];
+			// console.log(newClr)
+			setColorAtIndex(img, x, y, newClr);
+
+			let errR = oldR - newR;
+			let errG = oldG - newG;
+			let errB = oldB - newB;
+			distributeError(img, x, y, errR, errG, errB);
+			// console.log(clr)
+		}
+		progress += img.width
+		const percent = progress * 100 / maxProgress
+	}
 
 
-const id = setInterval(() => {
-  draw();
-}, 20);
+}
+
+function distributeError(img, x, y, errR, errG, errB) {
+	addError(img, 7 / 16.0, x + 1, y, errR, errG, errB);
+	addError(img, 3 / 16.0, x - 1, y + 1, errR, errG, errB);
+	addError(img, 5 / 16.0, x, y + 1, errR, errG, errB);
+	addError(img, 1 / 16.0, x + 1, y + 1, errR, errG, errB);
+}
+
+function addError(img, factor, x, y, errR, errG, errB) {
+	if (x < 0 || x >= img.width || y < 0 || y >= img.height) return;
+	let clr = getColorAtindex(img, x, y);
+	let r = clr[0];
+	let g = clr[1];
+	let b = clr[2];
+	clr[0] = r + errR * factor;
+	clr[1] = g + errG * factor;
+	clr[2] = b + errB * factor;
+
+	setColorAtIndex(img, x, y, clr);
+}
+
