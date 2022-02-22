@@ -81,7 +81,7 @@ function prepareDither() {
 		ctx.putImageData(imageData, 0, 0)
 		const out = canvas.toDataURL("image/jpeg");
 		output.src = out
-
+		output.setAttribute('src', out)
 	}
 	img.src = URL.createObjectURL(loadedImage);
 
@@ -90,6 +90,11 @@ function prepareDither() {
 function setColorDegree(event) {
 	colorDegree = event.target.value
 }
+
+async function downloadCanvas(el) {
+	const imageURI = canvas.toDataURL("image/jpg");
+	el.href = imageURI;
+};
 
 function toggleBw(obj) {
 
@@ -126,6 +131,8 @@ function closestStep(max, steps, value) {
 
 	return closest
 }
+
+
 
 function makeDithered(img, steps) {
 	let maxProgress = img.width * img.height

@@ -32,8 +32,8 @@ body {
 #drop-area {
 	border: 2px dashed #ccc;
 	border-radius: 20px;
-	min-width: 480px;
-	max-width: 100vw;
+	min-width: 85vw;
+	max-width: 85vw;
 	padding: 20px;
 }
 #drop-area.highlight {
