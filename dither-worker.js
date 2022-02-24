@@ -58,7 +58,7 @@ function makeDithered(img, steps) {
             let errR = oldR - newR;
             let errG = oldG - newG;
             let errB = oldB - newB;
-            distributeError(img, x, y, errR, errG, errB);
+            // distributeError(img, x, y, errR, errG, errB);
             // console.log(clr)
         }
         progress += img.width
