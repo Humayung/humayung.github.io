@@ -102,6 +102,7 @@ function receivedWorkerMessage(event) {
 		output.src = out
 		output.setAttribute('src', out)
 		loading.style.display = 'none'
+		progressValue.style.width = '0%'
 	} else {
 		const progress = event.data.progress
 		const maxProgress = event.data.maxProgress
