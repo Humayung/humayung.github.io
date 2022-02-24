@@ -52,7 +52,6 @@ let loadedImage;
 let colorDegree = 1;
 let bw = false;
 function processImage(file) {
-	console.log(file)
 	if (file.type.includes("image")) {
 		const image = URL.createObjectURL(file);
 		const output = document.getElementById('output')

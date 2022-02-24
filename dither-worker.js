@@ -52,14 +52,12 @@ function makeDithered(img, steps) {
             let newB = closestStep(255, steps, oldB);
 
             let newClr = [newR, newG, newB];
-            // console.log(newClr)
             setColorAtIndex(img, x, y, newClr);
 
             let errR = oldR - newR;
             let errG = oldG - newG;
             let errB = oldB - newB;
-            // distributeError(img, x, y, errR, errG, errB);
-            // console.log(clr)
+            distributeError(img, x, y, errR, errG, errB);
         }
         progress += img.width
         postMessage({
