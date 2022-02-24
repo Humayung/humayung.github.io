@@ -62,10 +62,17 @@ function makeDithered(img, steps) {
             // console.log(clr)
         }
         progress += img.width
-        const percent = progress * 100 / maxProgress
+        postMessage({
+            progress: progress,
+            maxProgress: maxProgress,
+            finished : false
+        })
     }
     postMessage({
-        imageData: img
+        imageData: img,
+        progress: progress,
+        maxProgress: maxProgress,
+        finished : true
     })
 }
 
