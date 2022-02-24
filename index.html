@@ -9,10 +9,13 @@
 		<title>Floyd-steinberg Dithering</title>
 	</head>
 	<div id="loading">
-		<div style="margin-bottom: 100px;">
+		<div>
 			<p>Dithering Process</p>
 		</div>
-		<div class="spinner"></div>
+		<!-- <div class="spinner"></div> -->
+		<div class="progress">
+			<div class="progress-value" id="progressValue" width="50%"></div>
+		</div>
 	</div>
 	<body>
 		<p>Image Dithering dengan metode Floyd-steinberg</p>
@@ -25,21 +28,22 @@
 				onchange="handleFiles(this.files)"
 			/>
 			<label class="button" for="fileElem" id="selectImage">Select Image</label>
-			<div id="ditherOutput">
-				<label class="button" onclick="prepareDither()">Dither Image</label>
-				<div id="ditherSettings">
-					<div id="colorDegree">
-						<div>Derajat Warna</div>
-						<input
-							type="number"
-							value="1"
-							onchange="setColorDegree(event)"
-							pattern="[0-9]"
-						/>
+			<div class="imgbox">
+				<div id="ditherOutput">
+					<label class="button" onclick="prepareDither()">Dither Image</label>
+					<div id="ditherSettings">
+						<div id="colorDegree">
+							<div>Derajat Warna</div>
+							<input
+								type="number"
+								value="1"
+								onchange="setColorDegree(event)"
+								pattern="[0-9]"
+							/>
+						</div>
 					</div>
+					<img class="center-fit" src="" id="output" />
 				</div>
-				<img src="" id="output" />
-				
 			</div>
 		</div>
 	</body>

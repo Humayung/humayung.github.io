@@ -35,6 +35,7 @@ window.onload = function () {
 		dropArea.classList.remove('active')
 	}
 
+
 };
 
 function handleDrop(e) {
@@ -73,7 +74,7 @@ let ctx = canvas.getContext("2d");
 function prepareDither() {
 	const output = document.getElementById('output')
 	var img = new Image;
-	
+
 	worker = new Worker('dither-worker.js')
 	canvas = document.createElement("canvas");
 	ctx = canvas.getContext("2d");
@@ -96,11 +97,19 @@ function prepareDither() {
 }
 
 function receivedWorkerMessage(event) {
-	ctx.putImageData(event.data.imageData, 0, 0)
-	const out = canvas.toDataURL("image/jpeg");
-	output.src = out
-	output.setAttribute('src', out)
-	loading.style.display = 'none'
+	if (event.data.finished) {
+		ctx.putImageData(event.data.imageData, 0, 0)
+		const out = canvas.toDataURL("image/jpeg");
+		output.src = out
+		output.setAttribute('src', out)
+		loading.style.display = 'none'
+	} else {
+		const progress = event.data.progress
+		const maxProgress = event.data.maxProgress
+		const percent = `${Math.round(progress * 100/maxProgress)}%`
+		const progressValue = document.getElementById('progressValue')
+		progressValue.style.width = percent
+	}
 }
 
 function setColorDegree(event) {
