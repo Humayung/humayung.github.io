@@ -1,50 +1,56 @@
 <!DOCTYPE html>
-<html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<script type="text/javascript" src="script.js"></script>
-		<link rel="stylesheet" href="style.css" />
-		<title>Floyd-steinberg Dithering</title>
-	</head>
-	<div id="loading">
-		<div>
-			<p>Dithering Process</p>
-		</div>
-		<!-- <div class="spinner"></div> -->
-		<div class="progress">
-			<div class="progress-value" id="progressValue" width="50%"></div>
-		</div>
-	</div>
-	<body>
-		<p>Image Dithering dengan metode Floyd-steinberg</p>
-		<div id="drop-area">
-			<input
-				type="file"
-				id="fileElem"
-				multiple
-				accept="image/*"
-				onchange="handleFiles(this.files)"
-			/>
-			<label class="button" for="fileElem" id="selectImage">Select Image</label>
-			<div class="imgbox">
-				<div id="ditherOutput">
-					<label class="button" onclick="prepareDither()">Dither Image</label>
-					<div id="ditherSettings">
-						<div id="colorDegree">
-							<div>Derajat Warna</div>
-							<input
-								type="number"
-								value="1"
-								onchange="setColorDegree(event)"
-								pattern="[0-9]"
-							/>
-						</div>
-					</div>
-					<img class="center-fit" src="" id="output" />
-				</div>
-			</div>
-		</div>
-	</body>
+
+<html>
+  <head>
+    <script src="script.js"></script>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="App">
+      <div class="modal">
+        <div class="modal-content">
+          <span class="close-button">&times;</span>
+          <span id="logTitle" style="color: black">Log Viewer</span>
+          <ul id="logViewer">
+            <li>Empty</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="title">Ngl.link spammer</div>
+
+      <label class="input-sizer">
+        <span>@</span>
+        <input
+          type="text"
+          onInput="this.parentNode.dataset.value = this.value"
+          size="4"
+          placeholder="username"
+          id="username"
+        />
+      </label>
+      <div style="margin: 10px"></div>
+      <button onclick="addTarget()" class="button">Spam</button>
+      <div style="margin: 20px"></div>
+
+      <table>
+        <thead>
+          <tr>
+            <th style="color: white" colspan="5">List of Victims</th>
+          </tr>
+          <tr>
+            <th>#</th>
+            <th>Username</th>
+            <th style="text-align: center">Count</th>
+            <th style="text-align: center">Action</th>
+          </tr>
+        </thead>
+        <tbody id="log">
+          <tr>
+            <td colspan="5" style="text-align: center">No victims yet</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </body>
 </html>
