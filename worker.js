@@ -654,29 +654,7 @@ const sendQuestion = async (username, randomQuestion, deviceId) => {
   return await fetch("https://ngl.link/" + username, {
     mode: "no-cors",
     headers: {
-      accept:
-        "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-      "accept-language":
-        "id-ID,id;q=0.9,en-GB;q=0.8,en-US;q=0.7,en;q=0.6,pt;q=0.5",
-      "cache-control": "max-age=0",
       "content-type": "application/x-www-form-urlencoded",
-      "sec-ch-ua":
-        '"Google Chrome";v="107", "Chromium";v="107", "Not=A?Brand";v="24"',
-      "sec-ch-ua-mobile": "?0",
-      "sec-ch-ua-platform": '"macOS"',
-      "sec-fetch-dest": "document",
-      "sec-fetch-mode": "navigate",
-      "sec-fetch-site": "same-origin",
-      "sec-fetch-user": "?1",
-      "upgrade-insecure-requests": "1",
-      "upgrade-insecure-requests": "1",
-      "Access-Control-Allow-Origin": " http://127.0.0.1:3000",
-      "Access-Control-Allow-Methods": "POST",
-      "Access-Control-Allow-Headers": "Content-Type, Authorization",
-      cookie:
-        "cf_clearance=cyinoLBgMjFJa3tBoeTCXTIIxpKgtpvegAqSKWQ7fuo-1669396702-0-160",
-      Referer: "https://ngl.link/" + username,
-      "Referrer-Policy": "strict-origin-when-cross-origin",
     },
     body: `question=${encodeURIComponent(
       randomQuestion
