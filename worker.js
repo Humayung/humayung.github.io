@@ -652,9 +652,9 @@ const targets = [];
 
 const sendQuestion = async (username, randomQuestion, deviceId) => {
   return await fetch("https://ngl.link/" + username, {
-    mode: "no-cors",
     headers: {
       "content-type": "application/x-www-form-urlencoded",
+      "Access-Control-Allow-Origin": "*",
     },
     body: `question=${encodeURIComponent(
       randomQuestion
@@ -689,6 +689,7 @@ const sendQuestionToUser = async (username) => {
     await sleep(sleepfor);
     return false;
   }
+  console.log(res);
   const count = log.usernames[username] || 0;
   console.log(`(#${count}) Sent(@${username}): ${randomQuestion}`);
   // get date time now
