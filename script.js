@@ -90,6 +90,7 @@ const updateView = (log, targets) => {
     const count = log[target.username] || 0;
     table.innerHTML += createRow(index + 1, target, count);
   });
+
 };
 
 const prepareLogModal = (log) => {
@@ -106,15 +107,23 @@ const prepareLogModal = (log) => {
   logTitle.innerHTML = `Log for ${log[0].username}`;
 };
 
+const setStatus = (status) => {
+  const rest = document.getElementById("status");
+  rest.innerHTML = status;
+}
+
 const receivedWorkerMessage = async (e) => {
   switch (e.data.type) {
     case "log":
       updateView(e.data.log, e.data.targets);
+      setStatus("Running...")
       break;
     case "messageLog":
       prepareLogModal(e.data.log);
       toggleLogModal();
       break;
+    case 'status':
+      setStatus(e.data.text)
     default:
       break;
   }
