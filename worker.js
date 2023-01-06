@@ -652,9 +652,9 @@ const targets = [];
 
 const sendQuestion = async (username, randomQuestion, deviceId) => {
   return await fetch("https://ngl.link/" + username, {
+    mode: "no-cors",
     headers: {
       "content-type": "application/x-www-form-urlencoded",
-      "Access-Control-Allow-Origin": "*",
     },
     body: `question=${encodeURIComponent(
       randomQuestion
@@ -774,6 +774,8 @@ const getActiveTargets = async () => {
   return targets.filter((t) => t.active);
 };
 
+let count = 0;
+let maxCount = 8;
 async function starSpamming() {
   while (true) {
     if (spammerStatus === "idle") {
@@ -784,8 +786,22 @@ async function starSpamming() {
     const activeTargets = await getActiveTargets();
     if (targets.length === 0 || activeTargets.length === 0) {
       console.log("no targets");
+      postMessage({
+        type: "status",
+        text: "idle...",
+      });
       await sleep(2000);
       continue;
+    }
+    count++;
+    if (count >= maxCount) {
+      console.log("sleeping for 1 minute");
+      postMessage({
+        type: "status",
+        text: "sleeping for 1 minute",
+      });
+      await sleep(60 * 1000);
+      count = 0;
     }
     // pick one of targets randomly
     const randomTarget = targets[Math.floor(Math.random() * targets.length)];
