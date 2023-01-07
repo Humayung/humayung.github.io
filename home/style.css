@@ -33,8 +33,11 @@ h2 {
 }
 
 body{
-  /* dark theme */
+  display: flex;
+  justify-content: center;
+  align-items: center;
   background-color: #1e1e1e;
+
 }
 
 button{
