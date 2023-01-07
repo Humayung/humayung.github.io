@@ -1,0 +1,29 @@
+<html>
+  
+  <head>
+    <link rel="stylesheet" href="style.css" />
+    <script type="text/javascript" src="script.js"></script>
+  </head>
+  <body>
+    <input
+      type="button"
+      onclick="location.href='/home';"
+      value="Home"
+      class="button"
+    />
+    <div class="container">
+      <h2>Stable Diffusion APi</h2>
+      <input type="text" id="prompt" placeholder="Enter prompt" />
+      <span style="margin: 10px"></span>
+      <button id="submit">Submit</button>
+      <span style="margin: 10px"></span>
+      <span id="status"></span>
+      <div class="img-container">
+        <img class="output-image" />
+        <img class="output-image" />
+        <img class="output-image" />
+        <img class="output-image" />
+      </div>
+    </div>
+  </body>
+</html>

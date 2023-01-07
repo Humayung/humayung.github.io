@@ -1,58 +1,9 @@
 <!DOCTYPE html>
-
 <html>
-  <head>
-    <script src="script.js"></script>
-    <link rel="stylesheet" href="style.css" />
-  </head>
   <body>
-    <div class="App">
-      <div class="modal">
-        <div class="modal-content">
-          <span class="close-button">&times;</span>
-          <span id="logTitle" style="color: black">Log Viewer</span>
-          <ul id="logViewer">
-            <li>Empty</li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="title">Ngl.link spammer</div>
-
-      <label class="input-sizer">
-        <span>@</span>
-        <input
-          type="text"
-          onInput="this.parentNode.dataset.value = this.value"
-          size="4"
-          placeholder="username"
-          id="username"
-        />
-      </label>
-      <div style="margin: 10px"></div>
-      <button onclick="addTarget()" class="button">Spam</button>
-      <div style="margin: 20px"></div>
-
-      <table>
-        <thead>
-          <tr>
-            <th style="color: white" colspan="5">
-              List of Victims (<span id="status"></span>)
-            </th>
-          </tr>
-          <tr>
-            <th>#</th>
-            <th>Username</th>
-            <th style="text-align: center">Count</th>
-            <th style="text-align: center">Action</th>
-          </tr>
-        </thead>
-        <tbody id="log">
-          <tr>
-            <td colspan="5" style="text-align: center">No victims yet</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    
+    <script src="perlin.js"></script>
+    <canvas id="myCanvas" width="500" height="500"></canvas>
+    <script src="script.js"></script>
   </body>
 </html>
