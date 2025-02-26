@@ -1,4 +1,3 @@
-
 let minX = -2.5, maxX = 1, minY = -1, maxY = 1;
 let tMinX = minX, tMaxX = maxX, tMinY = minY, tMaxY = maxY;
 let maxIter = 255;
@@ -14,14 +13,86 @@ let modifiedFormula = true;
 let modifier = 3;
 let tModifier = 3;
 let drawing = true;
+let renderQuality = 1;
+let worker = null;
+let isCalculating = false;
+let pendingRender = false;
+let useWorker = true; // Toggle for testing
+let performanceStats = {
+  workerTimes: [],
+  nonWorkerTimes: [],
+  lastRenderTime: 0
+};
+let SIDE_PANEL_WIDTH = 300; // Width of the side panel
+const ASPECT_RATIO = 16/9; // or you can use 4/3 if you prefer
+let screenRatio;
 
 function setup() {
-  createCanvas(448, 256);
+  // Calculate available space
+  canvasWidth = windowWidth - SIDE_PANEL_WIDTH - 20;
+  canvasHeight = windowHeight - 20;
+  
+  createCanvas(Math.floor(canvasWidth), Math.floor(canvasHeight));
   pixelDensity(1);
-  screenRatio = height/width;
+  
+  // Calculate the view bounds based on the aspect ratio
+  // This ensures the scale remains constant regardless of window size
+  let baseWidth = maxX - minX;  // Current view width (-2.5 to 1 = 3.5)
+  let baseHeight = maxY - minY;  // Current view height (-1 to 1 = 2)
+  let currentRatio = canvasWidth / canvasHeight;
+  
+  // Adjust the view bounds to match canvas ratio while keeping scale
+  if (currentRatio > baseWidth/baseHeight) {
+    // Window is wider - adjust X bounds
+    let newWidth = baseHeight * currentRatio;
+    let centerX = (minX + maxX) / 2;
+    minX = centerX - newWidth/2;
+    maxX = centerX + newWidth/2;
+  } else {
+    // Window is taller - adjust Y bounds
+    let newHeight = baseWidth / currentRatio;
+    let centerY = (minY + maxY) / 2;
+    minY = centerY - newHeight/2;
+    maxY = centerY + newHeight/2;
+  }
+  
+  // Update target bounds too
+  tMinX = minX;
+  tMaxX = maxX;
+  tMinY = minY;
+  tMaxY = maxY;
+  
   stroke(255);
   fill(255, 50, 0);
   textAlign(CENTER, CENTER);
+  
+  screenRatio = height/width;
+  
+  // Initialize worker with proper error handling
+  try {
+    worker = new Worker('mandelbrot-worker.js');
+    worker.onmessage = function(e) {
+      loadPixels();
+      pixels.set(new Uint8ClampedArray(e.data.pixels));
+      updatePixels();
+      isCalculating = false;
+      
+      const renderTime = performance.now() - performanceStats.lastRenderTime;
+      updatePerformanceStats(renderTime, true);
+      
+      // Handle any pending render
+      if (pendingRender) {
+        pendingRender = false;
+        mandelBrot();
+      }
+    };
+  } catch (e) {
+    console.error("Worker failed to initialize:", e);
+    // Fallback to non-worker version if worker fails
+    worker = null;
+  }
+
+  // Initial render
   mandelBrot();
 
   inputMaxX = document.getElementById('maxX');
@@ -52,7 +123,7 @@ function toggleFormula(){
 }
 
 function draw() {
-  if (drawing){
+  if (drawing && !isCalculating) {
     mandelBrot();
   }
   if (isValidCoord()){
@@ -82,7 +153,7 @@ function saveToImage(){
 function startSaving(){
   let multiplier = resolution.selectedIndex + 1;
   var c = document.getElementById("myCanvas");
-  var ctx = c.getContext("2d");
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
   var imgWidth = width * multiplier * 10;
   var imgHeigth = height * multiplier * 10
   c.width = imgWidth;
@@ -153,9 +224,26 @@ function loadData(data){
     tMaxY = data.maxY;
     tMinX = data.minX;
     tMaxX = data.maxX;
+    
+    // Set current bounds to target bounds
+    minX = tMinX;
+    maxX = tMaxX;
+    minY = tMinY;
+    maxY = tMaxY;
+    
+    // Adjust bounds to maintain correct scaling
+    adjustViewBounds();
+    
     updateInfo();
     updateCurrentpos();
     error.style.display = 'none';
+    
+    // Reset worker state
+    isCalculating = false;
+    pendingRender = false;
+    
+    // Force new render
+    mandelBrot();
   }catch(e){
     error.style.display = 'block';
   }
@@ -223,6 +311,7 @@ function mousePressed() {
 }
 
 async function pointZoom(){
+  renderQuality = 4;
   minXd = map(mouseX, 0, width, 0, tMaxX - tMinX);
   minYd = map(mouseY, 0, height, 0, tMaxY - tMinY);
   maxXd = map(width - mouseX, 0, width, 0, tMaxX - tMinX);
@@ -232,17 +321,23 @@ async function pointZoom(){
   tMinX += pointZoomAmt * minXd * polar; 
   tMinY += pointZoomAmt * minYd * polar; 
   tMaxX -= pointZoomAmt * maxXd * polar;  
-  tMaxY -= pointZoomAmt * maxYd * polar; 
-  // updateCurrentpos();
+  tMaxY -= pointZoomAmt * maxYd * polar;
+
+  // Set current bounds to target bounds
+  minX = tMinX;
+  maxX = tMaxX;
+  minY = tMinY;
+  maxY = tMaxY;
+  
+  // Adjust bounds to maintain correct scaling
+  adjustViewBounds();
 }
 
 function mouseDragged() {
-  rectW = mouseX - rectX;
-  rectH = rectW * screenRatio;
-
-  //   stroke(255);
-  //   line(pMouseX, pMouseY, mouseX, mouseY);
-  // }
+  if (selectingRect) {
+    rectW = mouseX - rectX;
+    rectH = rectW * screenRatio;
+  }
 }
 
 function mouseReleased() {
@@ -250,8 +345,10 @@ function mouseReleased() {
     rectZoom();
   }
 
-  if (dragging && !selectingRect){
+  if (dragging && !selectingRect) {
     updateCurrentpos();
+    renderQuality = 1;
+    mandelBrot();
   }
   selectingRect = false;
   dragging = false;
@@ -263,25 +360,32 @@ function updateCurrentpos(){
 
 function rectZoom(){
   zooms.push({
-    'minX' : tMinX, 
-    'minY' : tMinY, 
-    'maxX' : tMaxX, 
-    'maxY' : tMaxY
+    'minX': minX,
+    'minY': minY,
+    'maxX': maxX,
+    'maxY': maxY
   });
+
   newMinX = map(rectX, 0, width, minX, maxX);
   newMaxX = map(rectX + rectW, 0, width, minX, maxX);
   newMinY = map(rectY, 0, height, minY, maxY);
   newMaxY = map(rectY + rectH, 0, height, minY, maxY);
-  tMinX = newMinX;
-  tMaxX = newMaxX;
-  tMinY = newMinY;
-  tMaxY = newMaxY;
+
+  minX = newMinX;
+  maxX = newMaxX;
+  minY = newMinY;
+  maxY = newMaxY;
+
+  // Adjust bounds to maintain correct scaling
+  adjustViewBounds();
+  
   updateCurrentpos();
   updateInfo();
   mandelBrot();
 }
 
 function drag(){
+  renderQuality = 4;
   let dx = pMouseX - mouseX;
   let dy = pMouseY - mouseY;
   scaledDx = map(dx, 0, width, 0, tMaxX - tMinX) || 0;
@@ -292,12 +396,19 @@ function drag(){
   
   tMinX = currentPos.minX + scaledDx;
   tMaxX = currentPos.maxX + scaledDx;
-
   tMinY = currentPos.minY + scaledDy;
   tMaxY = currentPos.maxY + scaledDy;
-  updateInfo();
+
+  // Set current bounds to target bounds
+  minX = tMinX;
+  maxX = tMaxX;
+  minY = tMinY;
+  maxY = tMaxY;
   
-  // print(`ScaledDx ${scaledDx} ScaledDx ${scaledDy}`);
+  // Adjust bounds to maintain correct scaling
+  adjustViewBounds();
+  
+  updateInfo();
 }
 
 function direction(a){
@@ -308,9 +419,19 @@ function keyPressed(){
   if (key == ' ' && zooms.length > 0) {
     z = zooms.pop();
     tMinX = z.minX;
-    tMinY = z.minY;
     tMaxX = z.maxX;
+    tMinY = z.minY;
     tMaxY = z.maxY;
+    
+    // Set current bounds to target bounds
+    minX = tMinX;
+    maxX = tMaxX;
+    minY = tMinY;
+    maxY = tMaxY;
+    
+    // Adjust bounds to maintain correct scaling
+    adjustViewBounds();
+    
     updateCurrentpos();
     updateInfo();
     mandelBrot();
@@ -345,37 +466,178 @@ function selectRect() {
   
 }
 
-let timeMean = [];function mandelBrot() {
-  loadPixels();
-  generatePixels(width, height, pixels);
-  updatePixels();
+function mandelBrot() {
+  const startTime = performance.now();
+  
+  if (!useWorker || !worker) {
+    // Non-worker implementation
+    loadPixels();
+    generatePixels(width, height, pixels);
+    updatePixels();
+    const renderTime = performance.now() - startTime;
+    updatePerformanceStats(renderTime, false);
+    return;
+  }
 
+  if (isCalculating) {
+    pendingRender = true;
+    return;
+  }
+
+  isCalculating = true;
+  performanceStats.lastRenderTime = startTime;
+  worker.postMessage({
+    width,
+    height,
+    minX,
+    maxX,
+    minY,
+    maxY,
+    maxIter,
+    modifier,
+    renderQuality
+  });
 }
 
-function generatePixels(width, height, outPixels){
-  let x0, y0, x, y, iteration;
-  for (let px = 0; px < width; px++) {
-    for (let py = 0; py < height; py++) {
-      x0 = map(px, 0, width, minX, maxX);
-      y0 = map(py, 0, height, minY, maxY);
-      x = 0;
-      y = 0;
-      iteration = maxIter;
-      let xTemp;
-
-      while (x < 2 && iteration--) {
-        xTemp = x*x - y*y + x0;
-        y = modifier*x*y + y0;
+// Keep the original generatePixels as fallback
+function generatePixels(width, height, outPixels) {
+  for (let px = 0; px < width; px += renderQuality) {
+    for (let py = 0; py < height; py += renderQuality) {
+      const x0 = map(px, 0, width, minX, maxX);
+      const y0 = map(py, 0, height, minY, maxY);
+      let x = 0;
+      let y = 0;
+      let iteration = maxIter;
+      
+      let x2 = 0, y2 = 0;
+      while (x2 + y2 <= 4 && iteration--) {
+        x2 = x * x;
+        y2 = y * y;
+        const xTemp = x2 - y2 + x0;
+        y = modifier * x * y + y0;
         x = xTemp;
       }
+      
       iteration = maxIter - iteration;
-      pix = (px + py * width) * 4;
-      outPixels[pix + 0] = 0;
-      outPixels[pix + 1] = iteration;
-      outPixels[pix + 2] = iteration;
-      outPixels[pix + 3] = 255;
+      
+      for (let fillX = 0; fillX < renderQuality && px + fillX < width; fillX++) {
+        for (let fillY = 0; fillY < renderQuality && py + fillY < height; fillY++) {
+          const pix = ((px + fillX) + (py + fillY) * width) * 4;
+          outPixels[pix + 0] = 0;
+          outPixels[pix + 1] = iteration;
+          outPixels[pix + 2] = iteration;
+          outPixels[pix + 3] = 255;
+        }
+      }
     }
   }
+}
+
+// Add debounced full quality render
+let renderTimeout;
+function scheduleFullQualityRender() {
+  clearTimeout(renderTimeout);
+  renderTimeout = setTimeout(() => {
+    renderQuality = 1;
+    mandelBrot();
+  }, 150);
+}
+
+function toggleWorker() {
+  useWorker = !useWorker;
+  performanceStats.workerTimes = [];
+  performanceStats.nonWorkerTimes = [];
+  document.getElementById('workerStatus').textContent = useWorker ? 'ON' : 'OFF';
+  console.log(`Using ${useWorker ? 'Worker' : 'Non-Worker'} implementation`);
+}
+
+function updatePerformanceStats(renderTime, isWorker) {
+  const times = isWorker ? performanceStats.workerTimes : performanceStats.nonWorkerTimes;
+  times.push(renderTime);
   
-  console.log('s');
+  // Keep only last 10 measurements
+  if (times.length > 10) times.shift();
+  
+  const avg = times.reduce((a, b) => a + b, 0) / times.length;
+  
+  document.getElementById('perfStats').innerHTML = `
+    <div style="margin-top: 10px;">
+        <div>Mode: ${useWorker ? 'Worker' : 'Non-Worker'}</div>
+        <div>Last Render: ${renderTime.toFixed(1)}ms</div>
+        <div>Avg (last 10): ${avg.toFixed(1)}ms</div>
+        <div>Worker Avg: ${getAverage(performanceStats.workerTimes).toFixed(1)}ms</div>
+        <div>Non-Worker Avg: ${getAverage(performanceStats.nonWorkerTimes).toFixed(1)}ms</div>
+    </div>
+  `;
+}
+
+function getAverage(arr) {
+  return arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
+}
+
+// Add this function to test heavy workloads
+function stressTest() {
+  maxIter = 1000; // Increase iteration count
+  renderQuality = 1; // Force full quality
+  // Zoom into a complex region
+  loadData('{"minX":"-0.7436447860,"minY":"0.1318259043","maxX":"-0.7436447859","maxY":"0.1318259044"}');
+}
+
+function windowResized() {
+  canvasWidth = windowWidth - SIDE_PANEL_WIDTH - 20;
+  canvasHeight = windowHeight - 20;
+  
+  // Store current view center
+  let centerX = (minX + maxX) / 2;
+  let centerY = (minY + maxY) / 2;
+  
+  // Calculate scale (how much of the set is visible)
+  let scale = (maxX - minX) / canvasWidth; // units per pixel
+  
+  resizeCanvas(Math.floor(canvasWidth), Math.floor(canvasHeight));
+  
+  // Adjust bounds to new size while maintaining scale
+  let newWidth = canvasWidth * scale;
+  let newHeight = canvasHeight * scale;
+  
+  minX = centerX - newWidth/2;
+  maxX = centerX + newWidth/2;
+  minY = centerY - newHeight/2;
+  maxY = centerY + newHeight/2;
+  
+  // Update target bounds
+  tMinX = minX;
+  tMaxX = maxX;
+  tMinY = minY;
+  tMaxY = maxY;
+  
+  mandelBrot();
+}
+
+// Add this helper function to maintain correct scaling
+function adjustViewBounds() {
+  let currentRatio = width / height;
+  let viewWidth = maxX - minX;
+  let viewHeight = maxY - minY;
+  let viewRatio = viewWidth / viewHeight;
+
+  if (currentRatio > viewRatio) {
+    // Window is wider - adjust X bounds
+    let newWidth = viewHeight * currentRatio;
+    let centerX = (minX + maxX) / 2;
+    minX = centerX - newWidth/2;
+    maxX = centerX + newWidth/2;
+  } else {
+    // Window is taller - adjust Y bounds
+    let newHeight = viewWidth / currentRatio;
+    let centerY = (minY + maxY) / 2;
+    minY = centerY - newHeight/2;
+    maxY = centerY + newHeight/2;
+  }
+
+  // Update target bounds too
+  tMinX = minX;
+  tMaxX = maxX;
+  tMinY = minY;
+  tMaxY = maxY;
 }
