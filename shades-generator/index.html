@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ARGB to Composite RGB</title>
+  <style>
+    body { font-family: monospace; padding: 2rem; background: #f4f4f4; }
+    input { padding: 0.5rem; margin-right: 1rem; }
+    button { padding: 0.5rem 1rem; }
+    .result { margin-top: 2rem; white-space: pre-wrap; }
+    .color-box { width: 50px; height: 50px; display: inline-block; margin-right: 1rem; vertical-align: middle; border: 1px solid #ccc; }
+    #xmlOutput { background: #fff; padding: 1rem; border: 1px solid #ccc; cursor: pointer; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h2>ARGB over White → Resulting RGB</h2>
+  <input type="text" id="hexInput" placeholder="#RRGGBB">
+  <button onclick="generateCompositeColors()">Generate</button>
+
+  <div class="result" id="result"></div>
+
+  <script>
+    function hexToRgb(hex) {
+      hex = hex.replace('#', '');
+      if (hex.length !== 6) return null;
+      return {
+        r: parseInt(hex.substring(0, 2), 16),
+        g: parseInt(hex.substring(2, 4), 16),
+        b: parseInt(hex.substring(4, 6), 16)
+      };
+    }
+
+    function compositeToWhite(r, g, b, alpha) {
+      const rOut = (1 - alpha) * 255 + alpha * r;
+      const gOut = (1 - alpha) * 255 + alpha * g;
+      const bOut = (1 - alpha) * 255 + alpha * b;
+      return {
+        r: Math.round(rOut),
+        g: Math.round(gOut),
+        b: Math.round(bOut)
+      };
+    }
+
+    function rgbToHex(r, g, b) {
+      return '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('');
+    }
+
+    function escapeXml(str) {
+      return str.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function generateCompositeColors() {
+      const hex = document.getElementById('hexInput').value;
+      const rgb = hexToRgb(hex);
+      const container = document.getElementById('result');
+      container.innerHTML = '';
+      if (!rgb) {
+        container.innerText = 'Invalid hex color';
+        return;
+      }
+
+      const order = [1, 2, 3, 4, 5, 6];
+      let index = 0;
+      let xmlOutput = '';
+
+      for (let i = 100; i >= 10; i -= 18) {
+        const alpha = i / 100;
+        const composite = compositeToWhite(rgb.r, rgb.g, rgb.b, alpha);
+        const hexResult = rgbToHex(composite.r, composite.g, composite.b);
+
+        container.innerHTML += `
+          <div style="margin-bottom:1rem">
+            <div class="color-box" style="background:rgba(${rgb.r},${rgb.g},${rgb.b},${alpha})"></div>
+            <strong>Alpha:</strong> ${Math.round(alpha*100)}%<br>
+            <strong>Composite RGB:</strong> (${composite.r}, ${composite.g}, ${composite.b}) → ${hexResult}<br>
+            <div class="color-box" style="background:rgb(${composite.r},${composite.g},${composite.b})"></div>
+          </div>
+        `;
+
+        const xmlLine = `<color name="primary_${order[index]}" tools:override="true">${hexResult}</color>`;
+        xmlOutput += escapeXml(xmlLine) + '\n';
+        index++;
+      }
+
+      container.innerHTML += `
+        <h3>Copy-Paste XML:</h3>
+        <div id="xmlOutput" onclick="copyToClipboard(this)">${xmlOutput}</div>
+        <small>Click to copy</small>
+      `;
+    }
+
+    function copyToClipboard(element) {
+      const text = element.innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Copied to clipboard!');
+      }).catch(err => {
+        alert('Failed to copy: ' + err);
+      });
+    }
+  </script>
+</body>
+</html>
