@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Attribute Normalizer</title>
+        <style>
+            body {
+                font-family: sans-serif;
+                padding: 20px;
+                background-color: #121212;
+                color: #e0e0e0;
+            }
+            textarea {
+                width: 100%;
+                height: 200px;
+                background-color: #1e1e1e;
+                color: #e0e0e0;
+                border: 1px solid #333;
+                padding: 10px;
+                font-family: monospace;
+            }
+            pre {
+                background: #1e1e1e;
+                padding: 10px;
+                border: 1px solid #333;
+                overflow-x: auto;
+                white-space: pre-wrap;
+                word-wrap: break-word;
+                font-family: monospace;
+            }
+            button {
+                margin: 10px 0;
+                padding: 5px 10px;
+                background-color: #333;
+                color: #e0e0e0;
+                border: none;
+                cursor: pointer;
+            }
+            button:hover {
+                background-color: #555;
+            }
+            .string {
+                color: #8bc34a;
+            }
+            .number {
+                color: #ff9800;
+            }
+            .boolean {
+                color: #03a9f4;
+            }
+            .null {
+                color: #f44336;
+            }
+            .key {
+                color: #c792ea;
+            }
+        </style>
+    </head>
+    <body>
+        <h2>Attribute Normalizer</h2>
+        <textarea
+            id="inputJson"
+            placeholder="Paste AttributeValue JSON here"
+        ></textarea>
+        <label style="display: block; margin: 8px 0">
+            <input type="checkbox" id="forceArrayToggle" checked />
+            Force object fields into arrays
+        </label>
+        <br />
+        <button onclick="normalizeInput()">Normalize</button>
+        <h3>Output:</h3>
+        <pre id="outputJson"></pre>
+
+        <script>
+            function dotToCamelCase(str) {
+                if (!str) return "";
+                const parts = str.split(".").filter(Boolean);
+                return (
+                    parts[0] +
+                    parts
+                        .slice(1)
+                        .map((p) => p[0].toUpperCase() + p.slice(1))
+                        .join("")
+                );
+            }
+
+            // ===== INSERT PATH =====
+            function insertPath(obj, path, value) {
+                let current = obj;
+                for (let i = 0; i < path.length - 1; i++) {
+                    const key = path[i];
+                    current[key] ??= {};
+                    current = current[key];
+                }
+                current[path[path.length - 1]] = value;
+            }
+
+            // ===== MERGE WITHOUT OVERWRITE =====
+            function mergeNode(target, source) {
+                for (const key in source) {
+                    const value = source[key];
+
+                    if (
+                        typeof value === "object" &&
+                        !Array.isArray(value) &&
+                        typeof target[key] === "object" &&
+                        !Array.isArray(target[key])
+                    ) {
+                        mergeNode(target[key], value);
+                    } else if (
+                        typeof value === "object" &&
+                        !Array.isArray(value)
+                    ) {
+                        if (!Array.isArray(target[key])) {
+                            target[key] = [];
+                        }
+                        target[key].push(value);
+                    } else {
+                        target[key] = value;
+                    }
+                }
+            }
+
+            function forceObjectToArray(obj) {
+                if (Array.isArray(obj)) {
+                    return obj.map(forceObjectToArray);
+                }
+
+                if (obj && typeof obj === "object") {
+                    const result = {};
+                    for (const key in obj) {
+                        const val = obj[key];
+
+                        if (
+                            val &&
+                            typeof val === "object" &&
+                            !Array.isArray(val)
+                        ) {
+                            result[key] = [forceObjectToArray(val)];
+                        } else {
+                            result[key] = forceObjectToArray(val);
+                        }
+                    }
+                    return result;
+                }
+
+                return obj;
+            }
+
+            // ===== GROUP BY INDEX + NEST =====
+            function groupAndNest(attributes) {
+                const root = {};
+                const groups = {};
+
+                for (const attr of attributes) {
+                    const idx = attr.attributeIndex ?? 0;
+                    groups[idx] ??= [];
+                    groups[idx].push(attr);
+                }
+
+                for (const key in groups) {
+                    const bucket = {};
+
+                    for (const item of groups[key]) {
+                        insertPath(
+                            bucket,
+                            item.attributeKey.split("."),
+                            item.attributeValue
+                        );
+                    }
+
+                    mergeNode(root, bucket);
+                }
+
+                return root;
+            }
+
+            // ===== NORMALIZER =====
+            function normalizeAttributeValue(attr) {
+                const nested = groupAndNest(attr.attribute || []);
+
+                const result = {
+                    id: attr.id,
+                    systemId: attr.systemId,
+                    type: attr.type,
+                    status: attr.status,
+                    description: attr.description || "",
+                    createdBy: attr.createdBy,
+                    createdAt: attr.createdAt,
+                    updatedBy: attr.updatedBy,
+                    updatedAt: attr.updatedAt,
+                };
+
+                if (attr.identifier) {
+                    const key = dotToCamelCase(attr.identifier);
+                    result[key] = attr.value;
+                    result[key + "Label"] = attr.label;
+                }
+
+                Object.assign(result, nested);
+                return result;
+            }
+
+            // ===== SYNTAX HIGHLIGHT =====
+            function syntaxHighlight(json) {
+                json = JSON.stringify(json, null, 2)
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;");
+
+                return json.replace(
+                    /("(\\u[\da-fA-F]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(\.\d*)?([eE][+\-]?\d+)?)/g,
+                    (match) => {
+                        let cls = "number";
+                        if (/^"/.test(match))
+                            cls = /:$/.test(match) ? "key" : "string";
+                        else if (/true|false/.test(match)) cls = "boolean";
+                        else if (/null/.test(match)) cls = "null";
+                        return `<span class="${cls}">${match}</span>`;
+                    }
+                );
+            }
+
+            // ===== RUN =====
+            function normalizeInput() {
+                const input = document.getElementById("inputJson").value.trim();
+                const output = document.getElementById("outputJson");
+
+                try {
+                    const data = JSON.parse(input);
+                    const result = Array.isArray(data)
+                        ? data.map(normalizeAttributeValue)
+                        : normalizeAttributeValue(data);
+
+                    const forceArray =
+                        document.getElementById("forceArrayToggle").checked;
+                    const finalResult = forceArray
+                        ? forceObjectToArray(result)
+                        : result;
+                    output.innerHTML = syntaxHighlight(finalResult);
+                } catch (e) {
+                    output.textContent = "Invalid JSON: " + e.message;
+                }
+            }
+        </script>
+    </body>
+</html>
