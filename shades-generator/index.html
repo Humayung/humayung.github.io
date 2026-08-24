@@ -2,196 +2,449 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>ARGB to Composite RGB / RGB565</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ARGB → RGB / RGB565</title>
+
   <style>
-    body { font-family: monospace; padding: 2rem; background: #f4f4f4; }
-    input { padding: 0.5rem; margin-right: 1rem; }
-    button { padding: 0.5rem 1rem; }
-    .result { margin-top: 2rem; white-space: pre-wrap; }
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 24px;
+      font-family: monospace;
+      background: #f4f4f4;
+      color: #222;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    h2 {
+      margin: 0 0 16px;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    input {
+      flex: 1;
+      min-width: 0;
+      padding: 9px 12px;
+      border: 1px solid #bbb;
+      border-radius: 5px;
+      font-family: monospace;
+      font-size: 14px;
+    }
+
+    button {
+      padding: 9px 18px;
+      border: 0;
+      border-radius: 5px;
+      background: #222;
+      color: white;
+      font-family: monospace;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #444;
+    }
+
+    .results {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .result-card {
+      display: grid;
+      grid-template-columns: 42px 1fr;
+      gap: 10px;
+      align-items: center;
+      padding: 9px;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+    }
+
     .color-box {
-      width: 50px;
-      height: 50px;
-      display: inline-block;
-      margin-right: 1rem;
-      vertical-align: middle;
+      width: 42px;
+      height: 42px;
+      border-radius: 4px;
       border: 1px solid #ccc;
     }
-    #xmlOutput {
-      background: #fff;
-      padding: 1rem;
-      border: 1px solid #ccc;
-      cursor: pointer;
-      white-space: pre-wrap;
+
+    .info {
+      min-width: 0;
+      line-height: 1.45;
+      font-size: 13px;
     }
-    #rgb565Output {
-      background: #fff;
-      padding: 1rem;
+
+    .alpha {
+      font-weight: bold;
+      margin-bottom: 2px;
+    }
+
+    .rgb-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .rgb {
+      color: #555;
+    }
+
+    .rgb565 {
+      font-weight: bold;
+    }
+
+    .outputs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .output-section h3 {
+      margin: 0 0 6px;
+      font-size: 14px;
+    }
+
+    .output-box {
+      background: white;
       border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 10px;
+      font-size: 12px;
+      line-height: 1.5;
+      white-space: pre;
+      overflow-x: auto;
       cursor: pointer;
-      white-space: pre-wrap;
-      margin-top: 1rem;
+    }
+
+    .hint {
+      display: block;
+      margin-top: 4px;
+      color: #777;
+      font-size: 11px;
+    }
+
+    .error {
+      color: #b00020;
+      padding: 10px;
+      background: #fff;
+      border: 1px solid #e0b0b0;
+      border-radius: 5px;
+    }
+
+    @media (max-width: 650px) {
+      body {
+        padding: 14px;
+      }
+
+      .results,
+      .outputs {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
+
 <body>
-  <h2>ARGB over White → Resulting RGB / RGB565</h2>
 
-  <input type="text" id="hexInput" placeholder="#RRGGBB">
-  <button onclick="generateCompositeColors()">Generate</button>
+<div class="container">
 
-  <div class="result" id="result"></div>
+  <h2>ARGB → RGB / RGB565</h2>
 
-  <script>
-    function hexToRgb(hex) {
-      hex = hex.replace('#', '');
+  <div class="input-row">
+    <input
+      type="text"
+      id="hexInput"
+      placeholder="#RRGGBB"
+      value="#FF0000"
+      onkeydown="if(event.key === 'Enter') generateCompositeColors()"
+    >
+    <button onclick="generateCompositeColors()">Generate</button>
+  </div>
 
-      if (hex.length !== 6) return null;
+  <div id="result"></div>
 
-      return {
-        r: parseInt(hex.substring(0, 2), 16),
-        g: parseInt(hex.substring(2, 4), 16),
-        b: parseInt(hex.substring(4, 6), 16)
-      };
+</div>
+
+<script>
+  function hexToRgb(hex) {
+    hex = hex.trim().replace('#', '');
+
+    if (!/^[0-9a-fA-F]{6}$/.test(hex)) {
+      return null;
     }
 
-    function compositeToWhite(r, g, b, alpha) {
-      const rOut = (1 - alpha) * 255 + alpha * r;
-      const gOut = (1 - alpha) * 255 + alpha * g;
-      const bOut = (1 - alpha) * 255 + alpha * b;
+    return {
+      r: parseInt(hex.substring(0, 2), 16),
+      g: parseInt(hex.substring(2, 4), 16),
+      b: parseInt(hex.substring(4, 6), 16)
+    };
+  }
 
-      return {
-        r: Math.round(rOut),
-        g: Math.round(gOut),
-        b: Math.round(bOut)
-      };
+
+  // Normal ARGB composited over WHITE
+  function compositeToWhite(r, g, b, alpha) {
+    return {
+      r: Math.round((1 - alpha) * 255 + alpha * r),
+      g: Math.round((1 - alpha) * 255 + alpha * g),
+      b: Math.round((1 - alpha) * 255 + alpha * b)
+    };
+  }
+
+
+  // RGB565 composited over BLACK
+  function compositeToBlack(r, g, b, alpha) {
+    return {
+      r: Math.round(alpha * r),
+      g: Math.round(alpha * g),
+      b: Math.round(alpha * b)
+    };
+  }
+
+
+  // Convert 8-bit RGB → 16-bit RGB565
+  //
+  // R: 5 bits
+  // G: 6 bits
+  // B: 5 bits
+  //
+  // RRRRRGGGGGGBBBBB
+  function rgbTo565(r, g, b) {
+    const r5 = (r >> 3) & 0x1F;
+    const g6 = (g >> 2) & 0x3F;
+    const b5 = (b >> 3) & 0x1F;
+
+    return (r5 << 11) | (g6 << 5) | b5;
+  }
+
+
+  function rgb565ToHex(value) {
+    return '0x' + value
+      .toString(16)
+      .padStart(4, '0')
+      .toUpperCase();
+  }
+
+
+  function rgbToHex(r, g, b) {
+    return '#' + [r, g, b]
+      .map(x => x.toString(16).padStart(2, '0'))
+      .join('')
+      .toUpperCase();
+  }
+
+
+  function escapeXml(str) {
+    return str
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+
+
+  function generateCompositeColors() {
+    const hex = document.getElementById('hexInput').value;
+    const rgb = hexToRgb(hex);
+    const container = document.getElementById('result');
+
+    container.innerHTML = '';
+
+    if (!rgb) {
+      container.innerHTML =
+        '<div class="error">Invalid hex color. Use #RRGGBB.</div>';
+      return;
     }
 
-    function rgbToHex(r, g, b) {
-      return '#' + [r, g, b]
-        .map(x => x.toString(16).padStart(2, '0'))
-        .join('');
-    }
 
-    // Convert 8-bit RGB to RGB565 (16-bit)
-    function rgbTo565(r, g, b) {
-      const r5 = (r >> 3) & 0x1F;
-      const g6 = (g >> 2) & 0x3F;
-      const b5 = (b >> 3) & 0x1F;
+    /*
+      100 → 82 → 64 → 46 → 28 → 10
+    */
+    const alphas = [100, 82, 64, 46, 28, 10];
 
-      return (r5 << 11) | (g6 << 5) | b5;
-    }
+    let xmlOutput = '';
+    let rgb565Output = '';
 
-    function rgb565ToHex(rgb565) {
-      return '0x' + rgb565.toString(16).padStart(4, '0').toUpperCase();
-    }
+    const cards = [];
 
-    function escapeXml(str) {
-      return str
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
-    }
 
-    function generateCompositeColors() {
-      const hex = document.getElementById('hexInput').value;
-      const rgb = hexToRgb(hex);
-      const container = document.getElementById('result');
+    alphas.forEach((alphaPercent, index) => {
 
-      container.innerHTML = '';
+      const alpha = alphaPercent / 100;
 
-      if (!rgb) {
-        container.innerText = 'Invalid hex color';
-        return;
-      }
 
-      const order = [1, 2, 3, 4, 5, 6];
+      // --------------------------------
+      // RGB → composite against WHITE
+      // --------------------------------
+      const composite = compositeToWhite(
+        rgb.r,
+        rgb.g,
+        rgb.b,
+        alpha
+      );
 
-      let index = 0;
-      let xmlOutput = '';
-      let rgb565Output = '';
+      const hexResult = rgbToHex(
+        composite.r,
+        composite.g,
+        composite.b
+      );
 
-      for (let i = 100; i >= 10; i -= 18) {
-        const alpha = i / 100;
 
-        const composite = compositeToWhite(
-          rgb.r,
-          rgb.g,
-          rgb.b,
-          alpha
-        );
+      // --------------------------------
+      // RGB565 → composite against BLACK
+      // --------------------------------
+      const composite565 = compositeToBlack(
+        rgb.r,
+        rgb.g,
+        rgb.b,
+        alpha
+      );
 
-        const hexResult = rgbToHex(
-          composite.r,
-          composite.g,
-          composite.b
-        );
+      const rgb565 = rgbTo565(
+        composite565.r,
+        composite565.g,
+        composite565.b
+      );
 
-        const rgb565 = rgbTo565(
-          composite.r,
-          composite.g,
-          composite.b
-        );
+      const rgb565Hex = rgb565ToHex(rgb565);
 
-        const rgb565Hex = rgb565ToHex(rgb565);
 
-        container.innerHTML += `
-          <div style="margin-bottom:1rem">
-            <div
-              class="color-box"
-              style="background:rgba(${rgb.r},${rgb.g},${rgb.b},${alpha})">
+      cards.push(`
+        <div class="result-card">
+
+          <div
+            class="color-box"
+            style="background: rgba(
+              ${rgb.r},
+              ${rgb.g},
+              ${rgb.b},
+              ${alpha}
+            )"
+            title="Original ARGB"
+          ></div>
+
+          <div class="info">
+
+            <div class="alpha">
+              ${alphaPercent}% alpha
             </div>
 
-            <strong>Alpha:</strong> ${Math.round(alpha * 100)}%<br>
+            <div class="rgb-row">
 
-            <strong>Composite RGB:</strong>
-            (${composite.r}, ${composite.g}, ${composite.b})
-            → ${hexResult}<br>
+              <span class="rgb">
+                RGB: ${hexResult}
+              </span>
 
-            <strong>RGB565:</strong>
-            ${rgb565Hex}<br>
+              <span class="rgb565">
+                RGB565: ${rgb565Hex}
+              </span>
 
-            <div
-              class="color-box"
-              style="background:rgb(${composite.r},${composite.g},${composite.b})">
             </div>
+
+            <div class="rgb-row">
+
+              <span class="rgb">
+                White: ${composite.r},
+                ${composite.g},
+                ${composite.b}
+              </span>
+
+              <span class="rgb">
+                Black: ${composite565.r},
+                ${composite565.g},
+                ${composite565.b}
+              </span>
+
+            </div>
+
           </div>
-        `;
 
-        // Existing XML output
-        const xmlLine =
-          `<color name="primary_${order[index]}" tools:override="true">${hexResult}</color>`;
+        </div>
+      `);
 
-        xmlOutput += escapeXml(xmlLine) + '\n';
 
-        // RGB565 output
-        rgb565Output += `primary_${order[index]} = ${rgb565Hex}\n`;
+      // XML uses WHITE-composited RGB
+      const xmlLine =
+        `<color name="primary_${index + 1}" tools:override="true">${hexResult}</color>`;
 
-        index++;
-      }
+      xmlOutput += escapeXml(xmlLine) + '\n';
 
-      container.innerHTML += `
-        <h3>Copy-Paste XML:</h3>
-        <div id="xmlOutput" onclick="copyToClipboard(this)">
-${xmlOutput}</div>
-        <small>Click to copy</small>
 
-        <h3>RGB565:</h3>
-        <div id="rgb565Output" onclick="copyToClipboard(this)">
-${rgb565Output}</div>
-        <small>Click to copy</small>
-      `;
-    }
+      // RGB565 uses BLACK-composited RGB
+      rgb565Output +=
+        `primary_${index + 1} = ${rgb565Hex}\n`;
+    });
 
-    function copyToClipboard(element) {
-      const text = element.innerText;
 
-      navigator.clipboard.writeText(text)
-        .then(() => {
-          alert('Copied to clipboard!');
-        })
-        .catch(err => {
-          alert('Failed to copy: ' + err);
-        });
-    }
-  </script>
+    container.innerHTML = `
+
+      <div class="results">
+        ${cards.join('')}
+      </div>
+
+      <div class="outputs">
+
+        <div class="output-section">
+          <h3>RGB XML — white composite</h3>
+
+          <div
+            class="output-box"
+            onclick="copyToClipboard(this)"
+          >${xmlOutput}</div>
+
+          <small class="hint">Click to copy</small>
+        </div>
+
+
+        <div class="output-section">
+          <h3>RGB565 — black composite</h3>
+
+          <div
+            class="output-box"
+            onclick="copyToClipboard(this)"
+          >${rgb565Output}</div>
+
+          <small class="hint">Click to copy</small>
+        </div>
+
+      </div>
+    `;
+  }
+
+
+  function copyToClipboard(element) {
+    const text = element.innerText;
+
+    navigator.clipboard.writeText(text)
+      .then(() => {
+        const oldText = element.innerText;
+
+        element.innerText = 'Copied!';
+
+        setTimeout(() => {
+          element.innerText = oldText;
+        }, 700);
+      })
+      .catch(err => {
+        alert('Failed to copy: ' + err);
+      });
+  }
+
+
+  // Generate initial example
+  generateCompositeColors();
+</script>
+
 </body>
 </html>
