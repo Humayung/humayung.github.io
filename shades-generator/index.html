@@ -34,13 +34,21 @@
     }
 
     input {
-      flex: 1;
       min-width: 0;
       padding: 9px 12px;
       border: 1px solid #bbb;
       border-radius: 5px;
       font-family: monospace;
       font-size: 14px;
+    }
+
+    #hexInput {
+      flex: 1;
+    }
+
+    #stepsInput,
+    #lowestInput {
+      width: 110px;
     }
 
     button {
@@ -145,9 +153,24 @@
       border-radius: 5px;
     }
 
-    @media (max-width: 650px) {
+    @media (max-width: 700px) {
       body {
         padding: 14px;
+      }
+
+      .input-row {
+        flex-wrap: wrap;
+      }
+
+      #hexInput {
+        width: 100%;
+        flex-basis: 100%;
+      }
+
+      #stepsInput,
+      #lowestInput {
+        flex: 1;
+        width: auto;
       }
 
       .results,
@@ -165,6 +188,7 @@
   <h2>ARGB → RGB / RGB565</h2>
 
   <div class="input-row">
+
     <input
       type="text"
       id="hexInput"
@@ -172,7 +196,33 @@
       value="#FF0000"
       onkeydown="if(event.key === 'Enter') generateCompositeColors()"
     >
-    <button onclick="generateCompositeColors()">Generate</button>
+
+    <input
+      type="number"
+      id="stepsInput"
+      min="1"
+      max="100"
+      value="6"
+      title="Number of shades"
+      placeholder="Shades"
+      onkeydown="if(event.key === 'Enter') generateCompositeColors()"
+    >
+
+    <input
+      type="number"
+      id="lowestInput"
+      min="0"
+      max="100"
+      value="10"
+      title="Lowest alpha percentage"
+      placeholder="Lowest %"
+      onkeydown="if(event.key === 'Enter') generateCompositeColors()"
+    >
+
+    <button onclick="generateCompositeColors()">
+      Generate
+    </button>
+
   </div>
 
   <div id="result"></div>
@@ -180,6 +230,7 @@
 </div>
 
 <script>
+
   function hexToRgb(hex) {
     hex = hex.trim().replace('#', '');
 
@@ -195,7 +246,7 @@
   }
 
 
-  // Normal ARGB composited over WHITE
+  // RGB composited against WHITE
   function compositeToWhite(r, g, b, alpha) {
     return {
       r: Math.round((1 - alpha) * 255 + alpha * r),
@@ -205,7 +256,7 @@
   }
 
 
-  // RGB565 composited over BLACK
+  // RGB565 composited against BLACK
   function compositeToBlack(r, g, b, alpha) {
     return {
       r: Math.round(alpha * r),
@@ -215,13 +266,7 @@
   }
 
 
-  // Convert 8-bit RGB → 16-bit RGB565
-  //
-  // R: 5 bits
-  // G: 6 bits
-  // B: 5 bits
-  //
-  // RRRRRGGGGGGBBBBB
+  // RGB888 → RGB565
   function rgbTo565(r, g, b) {
     const r5 = (r >> 3) & 0x1F;
     const g6 = (g >> 2) & 0x3F;
@@ -255,11 +300,15 @@
 
 
   function generateCompositeColors() {
+
     const hex = document.getElementById('hexInput').value;
+
     const rgb = hexToRgb(hex);
+
     const container = document.getElementById('result');
 
     container.innerHTML = '';
+
 
     if (!rgb) {
       container.innerHTML =
@@ -268,31 +317,116 @@
     }
 
 
-    /*
-      100 → 82 → 64 → 46 → 28 → 10
-    */
-    const alphas = [100, 82, 64, 46, 28, 10];
+    let steps = parseInt(
+      document.getElementById('stepsInput').value,
+      10
+    );
+
+    let lowest = parseInt(
+      document.getElementById('lowestInput').value,
+      10
+    );
+
+
+    // Validate number of steps
+    if (!Number.isFinite(steps) || steps < 1) {
+      steps = 6;
+    }
+
+    steps = Math.min(steps, 100);
+
+
+    // Validate lowest alpha
+    if (!Number.isFinite(lowest)) {
+      lowest = 10;
+    }
+
+    lowest = Math.max(0, Math.min(lowest, 100));
+
+
+    // Prevent lowest from being higher than 100%
+    if (lowest > 100) {
+      lowest = 100;
+    }
+
 
     let xmlOutput = '';
+
     let rgb565Output = '';
 
     const cards = [];
 
 
-    alphas.forEach((alphaPercent, index) => {
+    /*
+      Generate evenly spaced alpha values.
+
+      Example:
+
+      Shades = 6
+      Lowest = 10
+
+      100%
+      82%
+      64%
+      46%
+      28%
+      10%
+
+
+      Shades = 6
+      Lowest = 30
+
+      100%
+      86%
+      72%
+      58%
+      44%
+      30%
+
+
+      Shades = 3
+      Lowest = 20
+
+      100%
+      60%
+      20%
+    */
+
+    for (let i = 0; i < steps; i++) {
+
+      let alphaPercent;
+
+
+      if (steps === 1) {
+
+        // One shade = 100%
+        alphaPercent = 100;
+
+      } else {
+
+        alphaPercent =
+          100 -
+          (i * ((100 - lowest) / (steps - 1)));
+
+      }
+
+
+      alphaPercent = Math.round(alphaPercent);
 
       const alpha = alphaPercent / 100;
 
 
       // --------------------------------
-      // RGB → composite against WHITE
+      // RGB → WHITE
       // --------------------------------
+
       const composite = compositeToWhite(
         rgb.r,
         rgb.g,
         rgb.b,
         alpha
       );
+
 
       const hexResult = rgbToHex(
         composite.r,
@@ -302,8 +436,9 @@
 
 
       // --------------------------------
-      // RGB565 → composite against BLACK
+      // RGB565 → BLACK
       // --------------------------------
+
       const composite565 = compositeToBlack(
         rgb.r,
         rgb.g,
@@ -311,27 +446,36 @@
         alpha
       );
 
+
       const rgb565 = rgbTo565(
         composite565.r,
         composite565.g,
         composite565.b
       );
 
+
       const rgb565Hex = rgb565ToHex(rgb565);
 
 
+      // --------------------------------
+      // UI CARD
+      // --------------------------------
+
       cards.push(`
+
         <div class="result-card">
 
           <div
             class="color-box"
-            style="background: rgba(
-              ${rgb.r},
-              ${rgb.g},
-              ${rgb.b},
-              ${alpha}
-            )"
-            title="Original ARGB"
+            style="
+              background:
+              rgba(
+                ${rgb.r},
+                ${rgb.g},
+                ${rgb.b},
+                ${alpha}
+              )
+            "
           ></div>
 
           <div class="info">
@@ -371,21 +515,32 @@
           </div>
 
         </div>
+
       `);
 
 
-      // XML uses WHITE-composited RGB
+      // --------------------------------
+      // XML OUTPUT
+      // --------------------------------
+
       const xmlLine =
-        `<color name="primary_${index + 1}" tools:override="true">${hexResult}</color>`;
+        `<color name="primary_${i + 1}" tools:override="true">${hexResult}</color>`;
 
       xmlOutput += escapeXml(xmlLine) + '\n';
 
 
-      // RGB565 uses BLACK-composited RGB
-      rgb565Output +=
-        `primary_${index + 1} = ${rgb565Hex}\n`;
-    });
+      // --------------------------------
+      // RGB565 OUTPUT
+      // --------------------------------
 
+      rgb565Output +=
+        `primary_${i + 1} = ${rgb565Hex}\n`;
+    }
+
+
+    // --------------------------------
+    // RENDER OUTPUT
+    // --------------------------------
 
     container.innerHTML = `
 
@@ -393,29 +548,42 @@
         ${cards.join('')}
       </div>
 
+
       <div class="outputs">
 
         <div class="output-section">
-          <h3>RGB XML — white composite</h3>
+
+          <h3>
+            RGB XML — white composite
+          </h3>
 
           <div
             class="output-box"
             onclick="copyToClipboard(this)"
           >${xmlOutput}</div>
 
-          <small class="hint">Click to copy</small>
+          <small class="hint">
+            Click to copy
+          </small>
+
         </div>
 
 
         <div class="output-section">
-          <h3>RGB565 — black composite</h3>
+
+          <h3>
+            RGB565 — black composite
+          </h3>
 
           <div
             class="output-box"
             onclick="copyToClipboard(this)"
           >${rgb565Output}</div>
 
-          <small class="hint">Click to copy</small>
+          <small class="hint">
+            Click to copy
+          </small>
+
         </div>
 
       </div>
@@ -424,10 +592,12 @@
 
 
   function copyToClipboard(element) {
+
     const text = element.innerText;
 
     navigator.clipboard.writeText(text)
       .then(() => {
+
         const oldText = element.innerText;
 
         element.innerText = 'Copied!';
@@ -435,6 +605,7 @@
         setTimeout(() => {
           element.innerText = oldText;
         }, 700);
+
       })
       .catch(err => {
         alert('Failed to copy: ' + err);
@@ -442,8 +613,8 @@
   }
 
 
-  // Generate initial example
   generateCompositeColors();
+
 </script>
 
 </body>
