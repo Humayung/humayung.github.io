@@ -98,7 +98,7 @@ var ctx = c.getContext("2d");
 c.addEventListener(
 	"click",
 	function () {
-		window.open("home", "_self");
+		window.location.href = "../";
 	},
 	false
 );

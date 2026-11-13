@@ -188,6 +188,13 @@ button { color: inherit; font: inherit; }
 .icon-bubble::after { position: absolute; right: 6px; bottom: -6px; width: 14px; height: 14px; border-right: 2px solid currentColor; transform: rotate(25deg); content: ""; }
 .icon-bubble span { transform: translateY(-1px); }
 .icon-bubble i { position: absolute; top: 6px; right: -23px; width: 6px; height: 6px; border-radius: 50%; background: currentColor; box-shadow: 11px -10px 0 currentColor, 22px 4px 0 currentColor; }
+.icon-mystery { overflow: visible; border: 1px dashed currentColor; border-radius: 50%; animation: mystery-spin 22s linear infinite; }
+.icon-mystery::before, .icon-mystery::after { position: absolute; inset: 8px; border: 1px solid currentColor; border-radius: 50%; content: ""; opacity: .55; }
+.icon-mystery::after { inset: 17px; border-style: dashed; opacity: .32; }
+.icon-mystery span { position: relative; z-index: 1; font: 43px var(--sans); text-shadow: 0 0 23px var(--card-glow); }
+.icon-mystery i, .icon-mystery b { position: absolute; z-index: 1; color: var(--card-accent); }
+.icon-mystery i { top: 2px; right: -4px; font: normal 16px var(--sans); }
+.icon-mystery b { bottom: 0; left: -2px; font: 18px var(--mono); }
 
 .about-section { position: relative; display: grid; grid-template-columns: 150px minmax(0, 1fr) 190px; align-items: center; gap: 40px; min-height: 375px; margin-bottom: 93px; padding: 56px 60px; overflow: hidden; background: var(--acid); color: #171914; }
 .about-section::after { position: absolute; top: -96px; right: 95px; width: 350px; height: 350px; border: 1px solid rgba(17, 18, 16, .16); border-radius: 50%; box-shadow: 0 0 0 27px rgba(17, 18, 16, .025), 0 0 0 54px rgba(17, 18, 16, .025); content: ""; pointer-events: none; }
@@ -217,6 +224,7 @@ button { color: inherit; font: inherit; }
 .has-motion .project-card[data-reveal] { transition-delay: var(--reveal-delay, 0ms); }
 @keyframes pulse { 50% { opacity: .55; box-shadow: 0 0 5px rgba(202, 255, 86, .35); } }
 @keyframes orbit { to { transform: translate(-50%, -50%) rotate(342deg); } }
+@keyframes mystery-spin { to { transform: rotate(360deg); } }
 
 @media (min-width: 1500px) { .hero { min-height: 740px; } }
 @media (max-width: 900px) {

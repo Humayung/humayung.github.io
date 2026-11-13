@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#151515" />
+    <meta name="description" content="A little moving mystery from Mirza's workshop." />
+    <title>Mystery Page — Mirza's Workshop</title>
+    <style>
+      * { box-sizing: border-box; }
+      html, body { width: 100%; min-height: 100%; margin: 0; overflow: hidden; background: #151515; }
+      .mystery-link { display: block; width: 100vw; height: 100vh; height: 100dvh; cursor: crosshair; }
+      canvas { display: block; width: 100%; height: 100%; }
+      .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+      .mystery-link:focus-visible { outline: 2px solid #caff56; outline-offset: -8px; }
+      @media (prefers-reduced-motion: reduce) { .mystery-link { cursor: pointer; } }
+    </style>
+    <script src="perlin.js" defer></script>
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <a class="mystery-link" href="../" aria-label="Return to Mirza's home page">
+      <canvas id="myCanvas" role="img" aria-label="Twelve words drift through a field of shifting colors. Tap to return home.">
+        Twelve words drift through a field of shifting colors.
+      </canvas>
+      <span class="sr-only">A mystery page. Activate this link to return to the home page.</span>
+    </a>
+  </body>
+</html>
