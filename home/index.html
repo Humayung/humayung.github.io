@@ -1,51 +1,173 @@
-<!-- a website with buttons linked to other app in ngl-spammer and stable-diffusion folder -->
-<!-- Path: index.html -->
-
-<!DOCTYPE html>
-<head>
-  <link rel="stylesheet" href="style.css" />
-</head>
-<html>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#111210" />
+    <meta name="description" content="A collection of tools, visual experiments, and personal projects by Mirza My Humayung." />
+    <title>Mirza Humayung — Digital Workshop</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+    <script src="script.js" defer></script>
+  </head>
   <body>
-    <input
-      type="button"
-      onclick="location.href='../invitation/';"
-      value="Wedding Invitation"
-    />
-    <input
-      type="button"
-      onclick="location.href='/ngl-spammer';"
-      value="NGL.LINK SPAMMER"
-    />
-    <input
-      type="button"
-      onclick="location.href='/stable-diffusion';"
-      value="Stable Diffusion"
-    />
-    <input
-      type="button"
-      onclick="location.href='/image-dithering';"
-      value="Image Dithering"
-    />
-    <input
-      type="button"
-      onclick="location.href='/mandelbrot-explorer';"
-      value="Mandelbrot Explorer"
-    />
-    <input
-      type="button"
-      onclick="location.href='/shades-generator';"
-      value="Shades Generator"
-    />
-    <input
-      type="button"
-      onclick="location.href='/img-to-rgb565';"
-      value="Image to RGB565"
-    />
-    <input
-    type="button"
-    onclick="location.href='/attribute-parser';"
-    value="Attribute Parser"
-  />
+    <a class="skip-link" href="#main">Skip to content</a>
+    <div class="ambient-grid" aria-hidden="true"></div>
+
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand" href="#top" aria-label="Mirza Humayung home">
+          <span class="brand-mark">MH<span>✳</span></span>
+          <span class="brand-name">MIRZA HUMAYUNG<small>PERSONAL WEB WORKSHOP</small></span>
+        </a>
+        <nav class="main-nav" aria-label="Main navigation">
+          <a href="#work">The index <span>07</span></a>
+          <a href="#about">About</a>
+        </nav>
+        <a class="header-link" href="../resume/">Resume <span aria-hidden="true">↗</span></a>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="hero page-width" id="top" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <p class="eyebrow"><span class="status-dot"></span> BUILT WITH CURIOSITY · BASED IN INDONESIA</p>
+          <h1 id="hero-title">Useful things.<br /><em>Unusual corners.</em></h1>
+          <p class="hero-description">I’m Mirza—an Android engineer who likes making the internet a little more playful. This is my shelf of handy tools, visual experiments, and ideas that escaped the notebook.</p>
+          <div class="hero-actions">
+            <a class="button button-bright" href="#work">Explore the workshop <span aria-hidden="true">↓</span></a>
+            <a class="text-link" href="https://github.com/Humayung" target="_blank" rel="noopener noreferrer">Find me on GitHub <span aria-hidden="true">↗</span></a>
+          </div>
+          <div class="hero-index" aria-label="Site details">
+            <span><i>01</i> MADE TO BE USED</span>
+            <span><i>02</i> ALWAYS A WORK IN PROGRESS</span>
+          </div>
+        </div>
+
+        <div class="hero-art" aria-hidden="true">
+          <div class="art-grid"></div>
+          <div class="art-orbit orbit-one"></div>
+          <div class="art-orbit orbit-two"></div>
+          <div class="art-orbit orbit-three"></div>
+          <div class="art-core"><span>MH</span><small>MAKE<br />THINGS<br />MATTER</small></div>
+          <div class="art-chip chip-top"><i>✳</i> IDEAS IN MOTION</div>
+          <div class="art-chip chip-left">CODE <b>+</b> CURIOSITY</div>
+          <div class="art-chip chip-right">EST. 2018 <b>↗</b></div>
+          <div class="art-coordinate">A SMALL CORNER OF THE WEB<br /><b>SCROLL TO WANDER</b></div>
+          <span class="art-cross cross-one">+</span><span class="art-cross cross-two">+</span>
+        </div>
+      </section>
+
+      <section class="featured page-width" aria-labelledby="featured-title">
+        <a class="invitation-card" href="../invitation/" aria-label="Open Mirza and Retno's wedding invitation">
+          <span class="invitation-rule" aria-hidden="true"></span>
+          <div class="invitation-copy">
+            <p class="micro-label"><span>PERSONAL EDITION</span><span>NO. 01 / 01</span></p>
+            <p class="invitation-kicker">THE MOST PERSONAL THING HERE</p>
+            <h2 id="featured-title">Mirza <i>&amp;</i> Retno</h2>
+            <p class="invitation-description">Awal dari selamanya. A wedding invitation made with love, a little Minang soul, and an unreasonable number of tiny details.</p>
+            <span class="invitation-cta">Step into our day <b aria-hidden="true">↗</b></span>
+          </div>
+          <div class="invitation-art" aria-hidden="true">
+            <div class="invitation-halo"></div>
+            <div class="invitation-seal"><span>M</span><i>♥</i><span>R</span></div>
+            <div class="invitation-art-caption">A LITTLE PLACE<br />FOR A VERY BIG DAY</div>
+            <span class="invitation-star star-one">✳</span><span class="invitation-star star-two">✴</span>
+          </div>
+          <span class="invitation-index" aria-hidden="true">SPECIAL<br />RELEASE <b>↗</b></span>
+        </a>
+      </section>
+
+      <section class="work-section page-width" id="work" aria-labelledby="work-title">
+        <div class="section-topline"><span>THE WORKSHOP / <b id="workshop-year">2026</b></span><span>TOOLS, TESTS &amp; HAPPY ACCIDENTS</span></div>
+        <div class="work-heading">
+          <div>
+            <p class="eyebrow">A FEW THINGS TO CLICK</p>
+            <h2 id="work-title">Pick a rabbit hole<span>.</span></h2>
+          </div>
+          <p>Little web projects, each made to do one thing a bit differently. Go on—open a few tabs.</p>
+        </div>
+
+        <div class="filter-bar" role="group" aria-label="Filter projects">
+          <span class="filter-label">SHOW ME</span>
+          <button class="filter-button is-active" type="button" data-filter="all" aria-pressed="true">Everything <i>07</i></button>
+          <button class="filter-button" type="button" data-filter="visual" aria-pressed="false">Visual experiments <i>03</i></button>
+          <button class="filter-button" type="button" data-filter="tools" aria-pressed="false">Useful tools <i>04</i></button>
+          <span class="filter-tail" aria-hidden="true">↙</span>
+        </div>
+
+        <div class="project-grid" aria-live="polite">
+          <a class="project-card project-featured" href="../mandelbrot-explorer/" data-category="visual" style="--card-accent:#caff56; --card-glow:rgba(202,255,86,.13)">
+            <div class="project-card-top"><span>01 / VISUAL EXPERIMENT</span><span class="project-arrow" aria-hidden="true">↗</span></div>
+            <div class="project-icon icon-mandelbrot" aria-hidden="true"><i></i><i></i><i></i><i></i><b>∞</b></div>
+            <div class="project-card-copy"><h3>Mandelbrot Explorer</h3><p>Take a closer look at the edge of infinity. It keeps going.</p></div>
+            <div class="project-card-foot"><span>FRACTALS · INTERACTIVE</span><span class="open-mark">OPEN PROJECT <b>↗</b></span></div>
+          </a>
+
+          <a class="project-card" href="../image-dithering/" data-category="visual" style="--card-accent:#fb795a; --card-glow:rgba(251,121,90,.13)">
+            <div class="project-card-top"><span>02 / IMAGE PLAY</span><span class="project-arrow" aria-hidden="true">↗</span></div>
+            <div class="project-icon icon-dither" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+            <div class="project-card-copy"><h3>Image Dithering</h3><p>Give your pictures a grainy, print-like second life.</p></div>
+            <div class="project-card-foot"><span>PIXELS · TEXTURE</span><span class="open-mark">OPEN PROJECT <b>↗</b></span></div>
+          </a>
+
+          <a class="project-card" href="../stable-diffusion/" data-category="visual" style="--card-accent:#bca8ff; --card-glow:rgba(188,168,255,.14)">
+            <div class="project-card-top"><span>03 / GENERATIVE</span><span class="project-arrow" aria-hidden="true">↗</span></div>
+            <div class="project-icon icon-spark" aria-hidden="true"><i>✳</i><b>✦</b><em>✧</em></div>
+            <div class="project-card-copy"><h3>Stable Diffusion</h3><p>A small doorway into image-generation experiments.</p></div>
+            <div class="project-card-foot"><span>IMAGES · AI</span><span class="open-mark">OPEN PROJECT <b>↗</b></span></div>
+          </a>
+
+          <a class="project-card" href="../shades-generator/" data-category="tools" style="--card-accent:#ffcf58; --card-glow:rgba(255,207,88,.13)">
+            <div class="project-card-top"><span>04 / COLOR TOOL</span><span class="project-arrow" aria-hidden="true">↗</span></div>
+            <div class="project-icon icon-shades" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+            <div class="project-card-copy"><h3>Shades Generator</h3><p>Find a color, then fan out a whole family of shades.</p></div>
+            <div class="project-card-foot"><span>COLOR · PALETTES</span><span class="open-mark">OPEN PROJECT <b>↗</b></span></div>
+          </a>
+
+          <a class="project-card" href="../img-to-rgb565/" data-category="tools" style="--card-accent:#64d9d1; --card-glow:rgba(100,217,209,.13)">
+            <div class="project-card-top"><span>05 / IMAGE UTILITY</span><span class="project-arrow" aria-hidden="true">↗</span></div>
+            <div class="project-icon icon-pixels" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+            <div class="project-card-copy"><h3>Image to RGB565</h3><p>Convert an image into compact 16-bit color data.</p></div>
+            <div class="project-card-foot"><span>IMAGES · EMBEDDED</span><span class="open-mark">OPEN PROJECT <b>↗</b></span></div>
+          </a>
+
+          <a class="project-card" href="../attribute-parser/" data-category="tools" style="--card-accent:#ff927c; --card-glow:rgba(255,146,124,.12)">
+            <div class="project-card-top"><span>06 / DEV UTILITY</span><span class="project-arrow" aria-hidden="true">↗</span></div>
+            <div class="project-icon icon-code" aria-hidden="true"><span>&lt;</span><i></i><span>/&gt;</span></div>
+            <div class="project-card-copy"><h3>Attribute Parser</h3><p>Pick apart HTML attributes and see what they’re made of.</p></div>
+            <div class="project-card-foot"><span>HTML · INSPECTOR</span><span class="open-mark">OPEN PROJECT <b>↗</b></span></div>
+          </a>
+
+          <a class="project-card" href="../ngl-spammer/" data-category="tools" style="--card-accent:#ff7eaa; --card-glow:rgba(255,126,170,.12)">
+            <div class="project-card-top"><span>07 / SOCIAL UTILITY</span><span class="project-arrow" aria-hidden="true">↗</span></div>
+            <div class="project-icon icon-bubble" aria-hidden="true"><span>?</span><i></i></div>
+            <div class="project-card-copy"><h3>NGL.Link Spammer</h3><p>Batch up questions for the anonymous inbox.</p></div>
+            <div class="project-card-foot"><span>MESSAGES · AUTOMATION</span><span class="open-mark">OPEN PROJECT <b>↗</b></span></div>
+          </a>
+        </div>
+        <p class="empty-state" hidden>No projects in this corner yet. I’m probably making one.</p>
+      </section>
+
+      <section class="about-section page-width" id="about" aria-labelledby="about-title">
+        <div class="about-stamp" aria-hidden="true"><span>MADE<br />AFTER<br />HOURS</span><i>✳</i></div>
+        <div class="about-copy">
+          <p class="eyebrow">A LITTLE CONTEXT</p>
+          <h2 id="about-title">Android by day.<br /><em>Curious by default.</em></h2>
+          <p>I’m an Android engineer who enjoys turning side quests into small, useful things. Some are practical, some are just fun to poke at—that’s the point of having a workshop.</p>
+          <div class="about-links"><a href="../resume/">Read my resume <span>↗</span></a><a href="mailto:humayungmirza@gmail.com">Say hello <span>↗</span></a></div>
+        </div>
+        <div class="about-side-note"><span>BUILT IN BITS &amp; PIECES</span><b>JAKARTA<br />+ EVERYWHERE</b><i>✳</i></div>
+      </section>
+    </main>
+
+    <footer class="site-footer page-width">
+      <a class="footer-mark" href="#top">MH<span>✳</span></a>
+      <p>Curiosity is a pretty good compass.</p>
+      <span>© <span id="current-year">2026</span> MIRZA HUMAYUNG</span>
+      <a class="back-top" href="#top">BACK TO TOP ↑</a>
+    </footer>
   </body>
 </html>
